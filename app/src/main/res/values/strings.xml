@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="reportBtn">New Report</string>
+    <string name="possesionBtn">Posssesion</string>
+    <string name="hitBtn">Hit</string>
+    <string name="faceoffBtn">FaceOff</string>
+    <string name="assistBtn">Assist</string>
+    <string name="penaltyDrawnBtn">Penalty Drawn</string>
+    <string name="penaltyTakenBtn">Penalty Taken</string>
+    <string name="shotBtn">Shot</string>
+    <string name="fightBtn">Fight</string>
+    <string name="shotForBtn">Shot For</string>
+    <string name="shotAgainstBtn">Shot Against</string>
+</resources>
