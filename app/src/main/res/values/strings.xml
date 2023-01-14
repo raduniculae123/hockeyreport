@@ -11,4 +11,14 @@
     <string name="fightBtn">Fight</string>
     <string name="shotForBtn">Shot For</string>
     <string name="shotAgainstBtn">Shot Against</string>
+    <string name="historyBtn">Report History</string>
+    <string name="menuTxtView">Menu</string>
+    <string name="timeShiftTxtView"> Time of shift - </string>
+    <string name="startShiftBtn"> Start/Resume shift</string>
+    <string name="endShiftBtn"> End Shift</string>
+    <string name="puaseShiftBtn"> Pause shift</string>
+    <string name="nextPeriodBtn">Next Period</string>
+    <string name="prevPeriodBtn">Previous Period</string>
+    <string name="endGameBtn">End Game</string>
+
 </resources>
