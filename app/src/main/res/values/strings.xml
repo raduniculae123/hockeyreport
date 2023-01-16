@@ -20,5 +20,6 @@
     <string name="nextPeriodBtn">Next Period</string>
     <string name="prevPeriodBtn">Previous Period</string>
     <string name="endGameBtn">End Game</string>
+    <string name="periodTxtView">Period 1</string>
 
 </resources>
