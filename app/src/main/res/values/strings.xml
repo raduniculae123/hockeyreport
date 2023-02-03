@@ -21,5 +21,7 @@
     <string name="prevPeriodBtn">Previous Period</string>
     <string name="endGameBtn">End Game</string>
     <string name="periodTxtView">Period 1</string>
+    <string name="onNetBtn">On Net</string>
+    <string name="notOnNetBtn">NOT On Net</string>
 
 </resources>

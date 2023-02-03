@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -37,11 +38,25 @@ public class ReportActivity extends AppCompatActivity {
     private TextView periodTxtView;
 
     //Report Variables
-    private int period = 1;
+    private static int period = 1;
 
+    private static int goals = 0;
+    private static int a1 = 0;
+    private static int a2 = 0;
+    static int sog = 0;
+    private static int blk = 0;
+    private static int pd = 0;
+    private static int pt = 0;
+    private static int fow = 0;
+    private static int fol = 0;
 
-    // constant code for runtime permissions
-    private static final int PERMISSION_REQUEST_CODE = 200;
+    private static int shotsFor = 0; //of the team (for CORSI)
+    private static int shotsAgainst = 0; //of the  team (for CORSI)
+    private static int cf = 0;
+    private static int ca = 0;
+
+    private static int goalsFor = 0;
+    private static int goalsAgainst = 0;
 
 
     @Override
@@ -62,6 +77,19 @@ public class ReportActivity extends AppCompatActivity {
         Button prevPeriodBtn = findViewById(R.id.prevPeriodBtn);
         Button nextPeriodBtn = findViewById(R.id.nextPeriodBtn);
         Button endGameBtn = findViewById(R.id.endGameBtn);
+        Button shotBtn = findViewById(R.id.shotBtn);
+        Button onNetBtn = findViewById(R.id.onNetBtn);
+        Button notOnNetBtn = findViewById(R.id.notOnNetBtn);
+        Button shotForBtn = findViewById(R.id.shotForBtn);
+        Button shotAgainstBtn = findViewById(R.id.shotAgainstBtn);
+        Button penaltyDrawnBtn = findViewById(R.id.penaltyDrawnBtn);
+        Button penaltyTakenBtn = findViewById(R.id.penaltyTakenBtn);
+        Button faceOff = findViewById(R.id.faceoffBtn);
+        Button possessionBtn = findViewById(R.id.possesionBtn);
+        Button assistBtn = findViewById(R.id.assistBtn);
+        Button fightBtn = findViewById(R.id.fightBtn);
+        Button hitBtn = findViewById(R.id.hitBtn);
+
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -144,6 +172,88 @@ public class ReportActivity extends AppCompatActivity {
                 }
             }
         });
+
+        /*----------------------------------------FACEOFFS---------------------------------------------*/
+        faceOff.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                //WIN/LOSE
+            }
+        });
+
+        /*----------------------------------------PENALTIES------------------------------------------------*/
+        penaltyDrawnBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                ReportActivity.pd++;
+            }
+        });
+
+        penaltyTakenBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                ReportActivity.pt++;
+            }
+        });
+
+
+        /*----------------------------------------SHOTS------------------------------------------------*/
+        shotBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                onNetBtn.setVisibility(View.VISIBLE);
+                notOnNetBtn.setVisibility(View.VISIBLE);
+                penaltyDrawnBtn.setEnabled(false);
+                penaltyTakenBtn.setEnabled(false);
+                faceOff.setEnabled(false);
+                shotBtn.setEnabled(false);
+                shotForBtn.setEnabled(false);
+                shotAgainstBtn.setEnabled(false);
+                possessionBtn.setEnabled(false);
+                assistBtn.setEnabled(false);
+                hitBtn.setEnabled(false);
+                fightBtn.setEnabled(false);
+
+
+            }
+        });
+
+
+        hitBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(ReportActivity.this, IceRink.class);
+                ReportActivity.this.startActivity(myIntent);
+            }
+        });
+        onNetBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                ReportActivity.sog++;
+                ReportActivity.shotsFor++;
+            }
+        });
+        shotForBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                ReportActivity.shotsFor++;
+            }
+        });
+        shotAgainstBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                ReportActivity.shotsAgainst++;
+            }
+        });
+
 
     }
 
