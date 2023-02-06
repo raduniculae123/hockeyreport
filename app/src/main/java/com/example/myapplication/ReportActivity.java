@@ -231,6 +231,16 @@ public class ReportActivity extends AppCompatActivity {
                 ReportActivity.this.startActivity(myIntent);
             }
         });
+
+        fightBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
+                ReportActivity.this.startActivity(myIntent);
+            }
+        });
+
         onNetBtn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
