@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="reportBtn">New Report</string>
-    <string name="possesionBtn">Posssesion</string>
+    <string name="possesionWonBtn">Posssesion Won</string>
+    <string name="possesionLostBtn">Posssesion Lost</string>
     <string name="hitBtn">Hit</string>
     <string name="faceoffBtn">FaceOff</string>
     <string name="assistBtn">Assist</string>
@@ -24,6 +25,7 @@
     <string name="onNetBtn">On Net</string>
     <string name="notOnNetBtn">NOT On Net</string>
     <string name="title_activity_goal">GoalActivity</string>
+    <string name="goalBtn">Goal</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

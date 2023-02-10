@@ -120,23 +120,12 @@ public class HockeyFieldView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//            float x = event.getX();
-//            float y = event.getY();
-//            Log.d("TEST", "X: " + x + " Y: " + y);
-//        }
-        float maxX = 0, maxY = 0;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float x = event.getX();
+            float y = event.getY();
+            Log.d("TEST", "X: " + x + " Y: " + y);
+        }
 
-        float x = event.getX();
-        float y = event.getY();
-        if (maxX < x) {
-            maxX = x;
-            Log.d("TEST", "X: " + maxX + " Y: " + maxY);
-        }
-        if (maxY < y) {
-            maxY = y;
-            Log.d("TEST", "X: " + maxX + " Y: " + maxY);
-        }
         return true;
     }
 }
