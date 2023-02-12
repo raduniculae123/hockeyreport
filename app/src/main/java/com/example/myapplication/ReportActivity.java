@@ -132,7 +132,7 @@ public class ReportActivity extends AppCompatActivity {
         fightBtn = findViewById(R.id.fightBtn);
         hitBtn = findViewById(R.id.hitBtn);
         goalBtn = findViewById(R.id.goalBtn);
-        secondAssistBtn = findViewById(R.id.firstAssistBtn);
+        firstAssistBtn = findViewById(R.id.firstAssistBtn);
         secondAssistBtn = findViewById(R.id.secondAssistBtn);
 
 
@@ -248,8 +248,8 @@ public class ReportActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
-                .setVisibility(View.VISIBLE);
-                notOnNetBtn.setVisibility(View.VISIBLE);
+                firstAssistBtn.setVisibility(View.VISIBLE);
+                secondAssistBtn.setVisibility(View.VISIBLE);
                 penaltyDrawnBtn.setEnabled(false);
                 penaltyTakenBtn.setEnabled(false);
                 faceOff.setEnabled(false);
@@ -264,6 +264,28 @@ public class ReportActivity extends AppCompatActivity {
                 goalBtn.setEnabled(false);
             }
         });
+
+        firstAssistBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                a1++;
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "3");
+                startActivityForResult(myIntent, REQUEST_CODE_1);
+                buttonsEnable();
+            }
+        });
+        secondAssistBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                a2++;
+                Toast.makeText(getBaseContext(), "2nd Assist Added", Toast.LENGTH_SHORT).show();
+                buttonsEnable();
+            }
+        });
+
 
 
 
@@ -391,6 +413,8 @@ public class ReportActivity extends AppCompatActivity {
     protected void buttonsEnable() {
         onNetBtn.setVisibility(View.INVISIBLE);
         notOnNetBtn.setVisibility(View.INVISIBLE);
+        firstAssistBtn.setVisibility(View.INVISIBLE);
+        secondAssistBtn.setVisibility(View.INVISIBLE);
         penaltyDrawnBtn.setEnabled(true);
         penaltyTakenBtn.setEnabled(true);
         faceOff.setEnabled(true);
@@ -422,6 +446,10 @@ public class ReportActivity extends AppCompatActivity {
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     myIntent.putExtra("goal", "1");
                     startActivityForResult(myIntent, REQUEST_CODE_2);
+                }
+                // 1st ASSIST
+                else if (eventType.equals("3")) {
+                    Toast.makeText(this, "1st Assist Added", Toast.LENGTH_SHORT).show();
                 }
                 // POSSESSION WON
                 else if (eventType.equals("4")) {
