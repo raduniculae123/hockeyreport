@@ -9,6 +9,12 @@ public class NetActivity extends AppCompatActivity {
 
     NetView netView;
     private String goal;
+    /*
+    EVENTS:
+    0 - goal
+    1 - shot on net
+
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

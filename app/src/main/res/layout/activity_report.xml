@@ -9,6 +9,36 @@
     tools:layout_editor_absoluteY="3dp">
 
     <Button
+        android:id="@+id/firstAssistBtn"
+        android:layout_width="160dp"
+        android:layout_height="96dp"
+        android:text="@string/firstAssistBtn"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.346"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.784" />
+
+    <Button
+        android:id="@+id/secondAssistBtn"
+        android:layout_width="160dp"
+        android:layout_height="96dp"
+        android:text="@string/secondAssistBtn"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.509"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.784" />
+
+    <Button
         android:id="@+id/onNetBtn"
         android:layout_width="160dp"
         android:layout_height="96dp"
@@ -183,7 +213,7 @@
         android:id="@+id/possesionLostBtn"
         android:layout_width="206dp"
         android:layout_height="84dp"
-        android:text="@string/possesionLostBtn"
+        android:text="@string/possessionLostBtn"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -197,7 +227,7 @@
         android:id="@+id/possesionWonBtn"
         android:layout_width="206dp"
         android:layout_height="84dp"
-        android:text="@string/possesionWonBtn"
+        android:text="@string/possessionWonBtn"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -296,7 +326,7 @@
         android:id="@+id/pauseShiftBtn"
         android:layout_width="202dp"
         android:layout_height="84dp"
-        android:text="@string/puaseShiftBtn"
+        android:text="@string/pauseShiftBtn"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

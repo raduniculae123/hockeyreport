@@ -2,19 +2,15 @@ package com.example.myapplication;
 
 import static android.app.Activity.RESULT_OK;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -29,6 +25,7 @@ public class NetView extends View {
     private float mYPos = 0;
 
     NetActivity netActivity;
+
     public void setMainActivity(NetActivity netActivity) {
         this.netActivity = netActivity;
     }
@@ -42,8 +39,6 @@ public class NetView extends View {
     }
 
 
-
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -52,7 +47,7 @@ public class NetView extends View {
         matrix.setScale(mScaleFactor, mScaleFactor);
         canvas.setMatrix(matrix);
 
-        canvas.drawBitmap(mBitmap, 5, 5, null);
+        canvas.drawBitmap(mBitmap, 0, 0, null);
 
         float width = mBitmap2.getWidth();
         float height = mBitmap2.getHeight();

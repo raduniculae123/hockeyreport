@@ -68,9 +68,11 @@ public class ReportActivity extends AppCompatActivity {
     private static int possesionsWon = 0;
     private static int possesionsLost = 0;
 
-    private static final int REQUEST_CODE_1 = 1; //SHOT ON GOAL ACTIVITY
-    private static final int SECOND_ACTIVITY_REQUEST_CODE = 1;
+    private static final int REQUEST_CODE_1 = 1; //Hockey field ACTIVITY
+    private static final int FIRST_ACTIVITY_REQUEST_CODE = 1;
 
+    private static final int REQUEST_CODE_2 = 2; //NET ACTIVITY
+    private static final int SECOND_ACTIVITY_REQUEST_CODE = 2;
 
 
     private Button endShiftBtn;
@@ -87,11 +89,16 @@ public class ReportActivity extends AppCompatActivity {
     private Button penaltyDrawnBtn;
     private Button penaltyTakenBtn;
     private Button faceOff;
-    private Button possessionBtn;
+    private Button possessionLostBtn;
+    private Button possessionWonBtn;
     private Button assistBtn;
     private Button fightBtn;
     private Button hitBtn;
     private Button goalBtn;
+
+    private Button firstAssistBtn;
+
+    private Button secondAssistBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,11 +126,14 @@ public class ReportActivity extends AppCompatActivity {
         penaltyDrawnBtn = findViewById(R.id.penaltyDrawnBtn);
         penaltyTakenBtn = findViewById(R.id.penaltyTakenBtn);
         faceOff = findViewById(R.id.faceoffBtn);
-        possessionBtn = findViewById(R.id.possesionLostBtn);
+        possessionLostBtn = findViewById(R.id.possesionLostBtn);
+        possessionWonBtn = findViewById(R.id.possesionWonBtn);
         assistBtn = findViewById(R.id.assistBtn);
         fightBtn = findViewById(R.id.fightBtn);
         hitBtn = findViewById(R.id.hitBtn);
         goalBtn = findViewById(R.id.goalBtn);
+        secondAssistBtn = findViewById(R.id.firstAssistBtn);
+        secondAssistBtn = findViewById(R.id.secondAssistBtn);
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -203,6 +213,7 @@ public class ReportActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     generatePDF();
+                    Toast.makeText(getBaseContext(), "REPORT CREATED!" , Toast.LENGTH_SHORT ).show();
                 }
             }
         });
@@ -232,6 +243,52 @@ public class ReportActivity extends AppCompatActivity {
                 ReportActivity.pt++;
             }
         });
+        /*----------------------------------------ASSISTS------------------------------------------------*/
+        assistBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                .setVisibility(View.VISIBLE);
+                notOnNetBtn.setVisibility(View.VISIBLE);
+                penaltyDrawnBtn.setEnabled(false);
+                penaltyTakenBtn.setEnabled(false);
+                faceOff.setEnabled(false);
+                shotBtn.setEnabled(false);
+                shotForBtn.setEnabled(false);
+                shotAgainstBtn.setEnabled(false);
+                possessionLostBtn.setEnabled(false);
+                possessionWonBtn.setEnabled(false);
+                assistBtn.setEnabled(false);
+                hitBtn.setEnabled(false);
+                fightBtn.setEnabled(false);
+                goalBtn.setEnabled(false);
+            }
+        });
+
+
+
+        /*----------------------------------------POSSESSIONS------------------------------------------------*/
+        possessionLostBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                possesionsLost++;
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "5");
+                startActivityForResult(myIntent, REQUEST_CODE_1);
+            }
+        });
+
+        possessionWonBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                possesionsWon++;
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "4");
+                startActivityForResult(myIntent, REQUEST_CODE_1);
+            }
+        });
 
 
         /*----------------------------------------SHOTS------------------------------------------------*/
@@ -248,13 +305,12 @@ public class ReportActivity extends AppCompatActivity {
                 shotBtn.setEnabled(false);
                 shotForBtn.setEnabled(false);
                 shotAgainstBtn.setEnabled(false);
-                possessionBtn.setEnabled(false);
+                possessionLostBtn.setEnabled(false);
+                possessionWonBtn.setEnabled(false);
                 assistBtn.setEnabled(false);
                 hitBtn.setEnabled(false);
                 fightBtn.setEnabled(false);
                 goalBtn.setEnabled(false);
-
-
             }
         });
 
@@ -264,8 +320,8 @@ public class ReportActivity extends AppCompatActivity {
             public void onClick(View view) {
                 ReportActivity.sog++;
 
-                Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
-                myIntent.putExtra("goal", "0");
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "1");
                 startActivityForResult(myIntent, REQUEST_CODE_1);
             }
         });
@@ -276,19 +332,10 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ReportActivity.notOnGoalShots++;
-                onNetBtn.setVisibility(View.INVISIBLE);
-                notOnNetBtn.setVisibility(View.INVISIBLE);
-                penaltyDrawnBtn.setEnabled(true);
-                penaltyTakenBtn.setEnabled(true);
-                faceOff.setEnabled(true);
-                shotBtn.setEnabled(true);
-                shotForBtn.setEnabled(true);
-                shotAgainstBtn.setEnabled(true);
-                possessionBtn.setEnabled(true);
-                assistBtn.setEnabled(true);
-                hitBtn.setEnabled(true);
-                fightBtn.setEnabled(true);
-                goalBtn.setEnabled(true);
+                buttonsEnable();
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "2");
+                startActivityForResult(myIntent, REQUEST_CODE_1);
 
             }
         });
@@ -299,8 +346,8 @@ public class ReportActivity extends AppCompatActivity {
             public void onClick(View view) {
                 ReportActivity.sog++;
 
-                Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
-                myIntent.putExtra("goal", "1");
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
+                myIntent.putExtra("eventType", "0");
                 startActivityForResult(myIntent, REQUEST_CODE_1);
             }
         });
@@ -320,13 +367,13 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
-        /*----------------------------------------SHOTS------------------------------------------------*/
+        /*----------------------------------------HITS & FIGHTS------------------------------------------------*/
 
         hitBtn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
-                Intent myIntent = new Intent(ReportActivity.this, IceRink.class);
+                Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
                 ReportActivity.this.startActivity(myIntent);
             }
         });
@@ -341,45 +388,66 @@ public class ReportActivity extends AppCompatActivity {
 
     }
 
+    protected void buttonsEnable() {
+        onNetBtn.setVisibility(View.INVISIBLE);
+        notOnNetBtn.setVisibility(View.INVISIBLE);
+        penaltyDrawnBtn.setEnabled(true);
+        penaltyTakenBtn.setEnabled(true);
+        faceOff.setEnabled(true);
+        shotBtn.setEnabled(true);
+        shotForBtn.setEnabled(true);
+        shotAgainstBtn.setEnabled(true);
+        possessionWonBtn.setEnabled(true);
+        possessionLostBtn.setEnabled(true);
+        assistBtn.setEnabled(true);
+        hitBtn.setEnabled(true);
+        fightBtn.setEnabled(true);
+        goalBtn.setEnabled(true);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == FIRST_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String eventType = data.getStringExtra("eventType");
+                // GOAL
+                if (eventType.equals("0")) {
+                    Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
+                    myIntent.putExtra("goal", "0");
+                    startActivityForResult(myIntent, REQUEST_CODE_2);
+                // SHOT ON NET
+                } else if (eventType.equals("1")) {
+                    Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
+                    myIntent.putExtra("goal", "1");
+                    startActivityForResult(myIntent, REQUEST_CODE_2);
+                }
+                // POSSESSION WON
+                else if (eventType.equals("4")) {
+                    Toast.makeText(this, "POSSESSION WON", Toast.LENGTH_SHORT).show();
+                }
+                // POSSESSION LOST
+                else if (eventType.equals("5")) {
+                    Toast.makeText(this, "POSSESSION LOST", Toast.LENGTH_SHORT).show();
+                }
+
+
+
+            }
+        }
         if (requestCode == SECOND_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                String goal = data.getStringExtra("goal");
+                String eventType = data.getStringExtra("goal");
                 // SHOT ON GOAL
-                if (goal.equals("0")) {
-                    Toast.makeText(this, "Shot added", Toast.LENGTH_SHORT).show();
-                    onNetBtn.setVisibility(View.INVISIBLE);
-                    notOnNetBtn.setVisibility(View.INVISIBLE);
-                    penaltyDrawnBtn.setEnabled(true);
-                    penaltyTakenBtn.setEnabled(true);
-                    faceOff.setEnabled(true);
-                    shotBtn.setEnabled(true);
-                    shotForBtn.setEnabled(true);
-                    shotAgainstBtn.setEnabled(true);
-                    possessionBtn.setEnabled(true);
-                    assistBtn.setEnabled(true);
-                    hitBtn.setEnabled(true);
-                    fightBtn.setEnabled(true);
-                    goalBtn.setEnabled(true);
-                } else if (goal.equals("1")) {
+                if (eventType.equals("0")) {
+                    Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     Toast.makeText(this, "Goal added", Toast.LENGTH_SHORT).show();
-                    onNetBtn.setVisibility(View.INVISIBLE);
-                    notOnNetBtn.setVisibility(View.INVISIBLE);
-                    penaltyDrawnBtn.setEnabled(true);
-                    penaltyTakenBtn.setEnabled(true);
-                    faceOff.setEnabled(true);
-                    shotBtn.setEnabled(true);
-                    shotForBtn.setEnabled(true);
-                    shotAgainstBtn.setEnabled(true);
-                    possessionBtn.setEnabled(true);
-                    assistBtn.setEnabled(true);
-                    hitBtn.setEnabled(true);
-                    fightBtn.setEnabled(true);
-                    goalBtn.setEnabled(true);
+                    buttonsEnable();
 
+                } else if (eventType.equals("1")) {
+                    Toast.makeText(this, "Shot on net added", Toast.LENGTH_SHORT).show();
+                    buttonsEnable();
                 }
 
             }

@@ -19,7 +19,7 @@
             android:name=".NetActivity"
             android:exported="false" />
         <activity
-            android:name=".IceRink"
+            android:name=".HockeyFieldActivity"
             android:exported="false" />
         <activity
             android:name=".ReportActivity"

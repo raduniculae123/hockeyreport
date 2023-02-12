@@ -1,11 +1,13 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Hockey Report</string>
     <string name="reportBtn">New Report</string>
-    <string name="possesionWonBtn">Posssesion Won</string>
-    <string name="possesionLostBtn">Posssesion Lost</string>
+    <string name="possessionWonBtn">Possession Won</string>
+    <string name="possessionLostBtn">Possession Lost</string>
     <string name="hitBtn">Hit</string>
     <string name="faceoffBtn">FaceOff</string>
     <string name="assistBtn">Assist</string>
+    <string name="firstAssistBtn">First Assist</string>
+    <string name="secondAssistBtn">Second Assist</string>
     <string name="penaltyDrawnBtn">Penalty Drawn</string>
     <string name="penaltyTakenBtn">Penalty Taken</string>
     <string name="shotBtn">Shot</string>
@@ -17,7 +19,7 @@
     <string name="timeShiftTxtView"> Time of shift - </string>
     <string name="startShiftBtn"> Start/Resume shift</string>
     <string name="endShiftBtn"> End Shift</string>
-    <string name="puaseShiftBtn"> Pause shift</string>
+    <string name="pauseShiftBtn"> Pause shift</string>
     <string name="nextPeriodBtn">Next Period</string>
     <string name="prevPeriodBtn">Previous Period</string>
     <string name="endGameBtn">End Game</string>
@@ -31,6 +33,8 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+
+
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
