@@ -5,6 +5,8 @@
     <string name="possessionLostBtn">Possession Lost</string>
     <string name="hitBtn">Hit</string>
     <string name="faceoffBtn">FaceOff</string>
+    <string name="faceoffLostBtn">FaceOff Lost</string>
+    <string name="faceoffWonBtn">FaceOff Won</string>
     <string name="assistBtn">Assist</string>
     <string name="firstAssistBtn">First Assist</string>
     <string name="secondAssistBtn">Second Assist</string>
