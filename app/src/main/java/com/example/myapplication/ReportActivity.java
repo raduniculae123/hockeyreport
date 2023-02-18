@@ -6,6 +6,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,24 +26,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.aspose.cells.Label;
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -84,13 +87,12 @@ public class ReportActivity extends AppCompatActivity {
 
 
 
+
     private static final int REQUEST_CODE_1 = 1; //Hockey field ACTIVITY
     private static final int FIRST_ACTIVITY_REQUEST_CODE = 1;
 
     private static final int REQUEST_CODE_2 = 2; //NET ACTIVITY
     private static final int SECOND_ACTIVITY_REQUEST_CODE = 2;
-
-
 
 
     private Button endShiftBtn;
@@ -119,6 +121,8 @@ public class ReportActivity extends AppCompatActivity {
 
     private Button secondAssistBtn;
 
+    private Button shotBlockedBtn;
+
     // Each index represents a metric:
     /*
 
@@ -134,19 +138,29 @@ public class ReportActivity extends AppCompatActivity {
 
 
      */
-    private static int[] firstPeriod = new int[8];
-    private static int[] secondPeriod = new int[8];
-    private static int[] thirdPeriod = new int[8];
-    private static int[] otPeriod = new int[8];
-    private static int[] soPeriod = new int[8];
+    private static float[] firstPeriod = new float[8];
+    private static float[] secondPeriod = new float[8];
+    private static float[] thirdPeriod = new float[8];
+    private static float[] otPeriod = new float[8];
 
 
-    private static int[] xlsxData = new int[49];
+
+    private static int[] xlsxData = new int[51];
+    private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
+    private static ArrayList<Triplet> netEvents = new ArrayList<>();
+    private static String timeOnIceString = Integer.toString(timeOnIce/60) + " mins " + Integer.toString(timeOnIce%60) + "sec";
+
+    private static final String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken", "Possessions Won: ", "Possessions Lost: "};
+    private static String[] reportValues =  {" ", " ", " ", timeOnIceString, Integer.toString(xlsxData[38]), Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), String.valueOf(a1+a2+goals), String.valueOf(notOnGoalShots+sog), String.valueOf(sog), String.valueOf(sog*1.0/(notOnGoalShots+sog)*100) + "%", String.valueOf(fow), String.valueOf(fol), String.valueOf(fow*1.0/(fow+fol)*100)+"%", String.valueOf(pd), String.valueOf(pt), String.valueOf(possessionsWon), String.valueOf(possessionsLost) };
 
 
-    private static final String[] columnNames = {"Name", "Date","Team Against","Location","Goals For","Goals Against","p1g","p1a","p1sog","p1toi","p1shfavg","p1posw","p1posl","p1shfnr","p2g","p2a","p2sog","p2toi","p2shfavg","p2posw","p2posl","p2shfnr","p3g","p3a","p3sog","p3toi","p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl","p4shfnr","a1","a2","sog","nsog","toi","posw","posl","shfnr","blk","pd","pt","fow","fol","shotsFor","shotsAgaints"};
-
-
+    private static final String[] columnNames = {"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
+    private static String name = "Radu Niculae";
+    private static String date = "24102021";
+    private static String location = "iceSheffield";
+    private static String teamFor = "Steaua";
+    private static String teamAgainst = "Brasov";
+    private static String position = "Right Wing";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -182,6 +196,7 @@ public class ReportActivity extends AppCompatActivity {
         goalBtn = findViewById(R.id.goalBtn);
         firstAssistBtn = findViewById(R.id.firstAssistBtn);
         secondAssistBtn = findViewById(R.id.secondAssistBtn);
+        shotBlockedBtn = findViewById(R.id.shotBlockedBtn);
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -258,7 +273,7 @@ public class ReportActivity extends AppCompatActivity {
                 Toast.makeText(getBaseContext(), "End shift", Toast.LENGTH_SHORT).show();
                 long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
                 int elapsedSeconds = (int) (elapsedMillis / 1000);
-
+                shifts++;
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 pauseOffset = 0;
                 chronometer.stop();
@@ -285,10 +300,18 @@ public class ReportActivity extends AppCompatActivity {
         endGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     generatePDF();
                     createEmptyXLSXFile();
                     Toast.makeText(getBaseContext(), "REPORT CREATED!", Toast.LENGTH_SHORT).show();
+                    for (Triplet event : netEvents) {
+                        Log.d("NET LOCATION", "(" + event.eventType + ", " + event.x + ", " + event.y + ")");
+                    }
+
+                    for (Triplet event : fieldEvents) {
+                        Log.d("FIELD LOCATION", "(" + event.eventType + ", " + event.x + ", " + event.y + ")");
+                    }
                 }
             }
         });
@@ -350,6 +373,7 @@ public class ReportActivity extends AppCompatActivity {
                 hitBtn.setEnabled(false);
                 fightBtn.setEnabled(false);
                 goalBtn.setEnabled(false);
+                shotBlockedBtn.setEnabled(false);
 
                 if (period == 1) {
                     firstPeriod[1]++;
@@ -440,6 +464,7 @@ public class ReportActivity extends AppCompatActivity {
                 shotsFor++;
                 onNetBtn.setVisibility(View.VISIBLE);
                 notOnNetBtn.setVisibility(View.VISIBLE);
+                shotBlockedBtn.setVisibility(View.VISIBLE);
                 penaltyDrawnBtn.setEnabled(false);
                 penaltyTakenBtn.setEnabled(false);
                 faceOffWonBtn.setEnabled(false);
@@ -476,6 +501,19 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
+        shotBlockedBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+
+                ReportActivity.blk++;
+                ReportActivity.shotsFor++;
+                buttonsEnable();
+
+            }
+        });
+
+
 
         notOnNetBtn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
@@ -495,15 +533,20 @@ public class ReportActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
+                goals++;
                 sog++;
                 shotsFor++;
                 if (period == 1) {
+                    firstPeriod[2]++;
                     firstPeriod[0]++;
                 } else if (period == 2) {
+                    secondPeriod[2]++;
                     secondPeriod[0]++;
                 } else if (period == 3) {
+                    thirdPeriod[2]++;
                     thirdPeriod[0]++;
                 } else if (period == 4) {
+                    otPeriod[2]++;
                     otPeriod[0]++;
                 }
                 Intent myIntent = new Intent(ReportActivity.this, HockeyFieldActivity.class);
@@ -556,6 +599,7 @@ public class ReportActivity extends AppCompatActivity {
         notOnNetBtn.setVisibility(View.INVISIBLE);
         firstAssistBtn.setVisibility(View.INVISIBLE);
         secondAssistBtn.setVisibility(View.INVISIBLE);
+        shotBlockedBtn.setVisibility(View.INVISIBLE);
         penaltyDrawnBtn.setEnabled(true);
         penaltyTakenBtn.setEnabled(true);
         faceOffWonBtn.setEnabled(true);
@@ -578,31 +622,39 @@ public class ReportActivity extends AppCompatActivity {
         if (requestCode == FIRST_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 String eventType = data.getStringExtra("eventType");
+                float eventX = Float.parseFloat(data.getStringExtra("eventX"));
+                float eventY = Float.parseFloat(data.getStringExtra("eventY"));
                 // GOAL
                 if (eventType.equals("0")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     myIntent.putExtra("goal", "0");
                     startActivityForResult(myIntent, REQUEST_CODE_2);
                     // SHOT ON NET
                 } else if (eventType.equals("1")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     myIntent.putExtra("goal", "1");
                     startActivityForResult(myIntent, REQUEST_CODE_2);
                 }
                 // SHOT NOT ON NET
                 else if (eventType.equals("2")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Toast.makeText(this, "Shot NOT on net", Toast.LENGTH_SHORT).show();
                 }
                 // 1st ASSIST
                 else if (eventType.equals("3")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Toast.makeText(this, "1st Assist", Toast.LENGTH_SHORT).show();
                 }
                 // POSSESSION WON
                 else if (eventType.equals("4")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Toast.makeText(this, "Possession won", Toast.LENGTH_SHORT).show();
                 }
                 // POSSESSION LOST
                 else if (eventType.equals("5")) {
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
                     Toast.makeText(this, "Possession lost", Toast.LENGTH_SHORT).show();
                 }
 
@@ -612,15 +664,19 @@ public class ReportActivity extends AppCompatActivity {
         if (requestCode == SECOND_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 String eventType = data.getStringExtra("goal");
+                float shotX = Float.parseFloat(data.getStringExtra("shotX"));
+                float shotY = Float.parseFloat(data.getStringExtra("shotY"));
                 // SHOT ON GOAL
                 if (eventType.equals("0")) {
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     Toast.makeText(this, "Goal!", Toast.LENGTH_SHORT).show();
                     buttonsEnable();
+                    netEvents.add(new Triplet(eventType, shotX, shotY));
 
                 } else if (eventType.equals("1")) {
                     Toast.makeText(this, "Shot on net", Toast.LENGTH_SHORT).show();
                     buttonsEnable();
+                    netEvents.add(new Triplet(eventType, shotX, shotY));
                 }
 
             }
@@ -628,26 +684,35 @@ public class ReportActivity extends AppCompatActivity {
 
     }
 
-    private void insertData(){
+    private void insertData() {
+        timeOnIce = (int)(firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
+        if(firstPeriod[7] != 0)
+            firstPeriod[4] = firstPeriod[3]*1.0f/firstPeriod[7];
+        if(secondPeriod[7] != 0)
+            secondPeriod[4] = secondPeriod[3]*1.0f/secondPeriod[7];
+        if(thirdPeriod[7] != 0)
+            thirdPeriod[4] = thirdPeriod[3]*1.0f/thirdPeriod[7];
+        if(otPeriod[7] != 0)
+            otPeriod[4] = otPeriod[3]*1.0f/otPeriod[7];
         int k = 0;
         xlsxData[k] = goalsFor;
         k++;
         xlsxData[k] = goalsAgainst;
         k++;
-        for(int i=0; i<firstPeriod.length; i++){
-            xlsxData[k] = firstPeriod[i];
+        for (int i = 0; i < firstPeriod.length; i++) {
+            xlsxData[k] = (int) firstPeriod[i];
             k++;
         }
-        for(int i=0; i<secondPeriod.length; i++){
-            xlsxData[k] = secondPeriod[i];
+        for (int i = 0; i < secondPeriod.length; i++) {
+            xlsxData[k] = (int) secondPeriod[i];
             k++;
         }
-        for(int i=0; i<thirdPeriod.length; i++){
-            xlsxData[k] = thirdPeriod[i];
+        for (int i = 0; i < thirdPeriod.length; i++) {
+            xlsxData[k] = (int) thirdPeriod[i];
             k++;
         }
-        for(int i=0; i<otPeriod.length; i++){
-            xlsxData[k] = otPeriod[i];
+        for (int i = 0; i < otPeriod.length; i++) {
+            xlsxData[k] = (int) otPeriod[i];
             k++;
         }
         xlsxData[k] = a1;
@@ -680,6 +745,10 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = shotsFor;
         k++;
         xlsxData[k] = shotsAgainst;
+        k++;
+        xlsxData[k] = (int)(timeOnIce*1.0/shifts);
+        k++;
+        xlsxData[k] = goals;
 
     }
 
@@ -689,6 +758,7 @@ public class ReportActivity extends AppCompatActivity {
         Document document = new Document(pageSize);
         try {
             String fileName = "pdf_file.pdf";
+            String[] reportValues =  {" ", " ", " ", timeOnIceString, Integer.toString(xlsxData[38]), Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), String.valueOf(a1+a2+goals), String.valueOf(notOnGoalShots+sog), String.valueOf(sog), String.valueOf(sog*1.0/(notOnGoalShots+sog)*100) + "%", String.valueOf(fow), String.valueOf(fol), String.valueOf(fow*1.0/(fow+fol)*100)+"%", String.valueOf(pd), String.valueOf(pt), String.valueOf(possessionsWon), String.valueOf(possessionsLost) };
 
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
@@ -700,9 +770,63 @@ public class ReportActivity extends AppCompatActivity {
 
             // Open the output stream and write the PDF file
             FileOutputStream fos = (FileOutputStream) contentResolver.openOutputStream(uri);
-            PdfWriter.getInstance(document, fos);
+            PdfWriter writer = PdfWriter.getInstance(document, fos);
             document.open();
-            document.add(new Paragraph("Hello World!"));
+
+            // Create a PdfContentByte instance and set the font
+            PdfContentByte cb = writer.getDirectContent();
+            BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            cb.setFontAndSize(bf, 40);
+            cb.setColorFill(BaseColor.BLUE);
+            float maxHeight = pageSize.getHeight();
+            float maxWidth = pageSize.getWidth();
+            // Set the text location with coordinates
+            cb.beginText();
+            cb.setTextMatrix(0, 565);
+            cb.showText(name + " - " +location+ " - " + date);
+
+
+            cb.setFontAndSize(bf, 17);
+            int y = 535;
+            cb.setTextMatrix(0, y);
+            cb.showText(reportData[0] + teamFor + " - " + goalsFor);
+            y-=27;
+
+            cb.setTextMatrix(0, y);
+            cb.showText(reportData[1] + teamAgainst + " - " + goalsAgainst);
+            y-=27;
+
+            cb.setTextMatrix(0, y);
+            cb.showText(reportData[2] + position);
+            y-=27;
+
+            for(int i=3; i<reportData.length; i++){
+                cb.setTextMatrix(0, y);
+                cb.showText(reportData[i] + reportValues[i]);
+                y-=27.5;
+            }
+
+            cb.endText();
+
+            Log.d("GO", Integer.toString(goals));
+
+
+            /*
+            // Load the image from the drawable resource
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.net);
+
+            // Create an Image object from the bitmap
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            Image image = Image.getInstance(stream.toByteArray());
+
+            // Set the image position and size
+            image.setAbsolutePosition(100, 100);
+            image.scaleToFit(400, 400);
+
+            // Add the image to the PDF
+            cb.addImage(image);
+            */
             document.close();
 
             Log.d("PDF", "Report Created");
@@ -710,6 +834,7 @@ public class ReportActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private void createEmptyXLSXFile() {
         insertData();
@@ -719,32 +844,79 @@ public class ReportActivity extends AppCompatActivity {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // Add a sheet and set the value of the first cell to 1
         XSSFSheet sheet = workbook.createSheet();
-        XSSFRow row = sheet.createRow(0);
-
-        for(int i=0; i<columnNames.length; i++){
-            XSSFCell cell = row.createCell(i);
+        XSSFRow row0 = sheet.createRow(0);
+        int i, j, k, l;
+        for (i = 0; i < columnNames.length; i++) {
+            XSSFCell cell = row0.createCell(i);
             cell.setCellValue(columnNames[i]);
         }
 
-        row = sheet.createRow(1);
+        XSSFRow row1 = sheet.createRow(1);
 
 
-        XSSFCell cell = row.createCell(0);
+        XSSFCell cell = row1.createCell(0);
         cell.setCellValue("Name");
 
-        cell = row.createCell(1);
+        cell = row1.createCell(1);
         cell.setCellValue("Date");
 
-        cell = row.createCell(2);
+        cell = row1.createCell(2);
         cell.setCellValue("Team against");
 
-        cell = row.createCell(3);
+        cell = row1.createCell(3);
         cell.setCellValue("Location");
 
+        l = 4;
 
-        for(int i=0; i<xlsxData.length; i++){
-            cell = row.createCell(4+i);
-            cell.setCellValue(xlsxData[i]);
+
+        for (j = 0; j < xlsxData.length; j++) {
+            cell = row1.createCell(l);
+            cell.setCellValue(xlsxData[j]);
+            l++;
+        }
+
+        for (k = 0; k < netEvents.size(); k++) {
+            cell = row0.createCell(i);
+            cell.setCellValue("netType");
+            cell = row0.createCell(i + 1);
+            cell.setCellValue("netX");
+            cell = row0.createCell(i + 2);
+            cell.setCellValue("netY");
+            i += 3;
+        }
+
+        for (k = 0; k < fieldEvents.size(); k++) {
+            cell = row0.createCell(i);
+            cell.setCellValue("fieldType");
+            cell = row0.createCell(i + 1);
+            cell.setCellValue("fieldX");
+            cell = row0.createCell(i + 2);
+            cell.setCellValue("fieldY");
+            i += 3;
+        }
+
+        for (j = 0; j < netEvents.size(); j++) {
+            cell = row1.createCell(l);
+            cell.setCellValue(netEvents.get(j).eventType);
+            l++;
+            cell = row1.createCell(l);
+            cell.setCellValue(netEvents.get(j).x);
+            l++;
+            cell = row1.createCell(l);
+            cell.setCellValue(netEvents.get(j).y);
+            l++;
+        }
+
+        for (j = 0; j < fieldEvents.size(); j++) {
+            cell = row1.createCell(l);
+            cell.setCellValue(fieldEvents.get(j).eventType);
+            l++;
+            cell = row1.createCell(l);
+            cell.setCellValue(fieldEvents.get(j).x);
+            l++;
+            cell = row1.createCell(l);
+            cell.setCellValue(fieldEvents.get(j).y);
+            l++;
         }
 
 
@@ -768,10 +940,17 @@ public class ReportActivity extends AppCompatActivity {
         }
     }
 
+    class Triplet {
+        String eventType;
+        float x;
+        float y;
 
-
-
-
+        public Triplet(String eventType, float x, float y) {
+            this.eventType = eventType;
+            this.x = x;
+            this.y = y;
+        }
+    }
 
 
 }

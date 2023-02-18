@@ -14,6 +14,7 @@
     <string name="penaltyTakenBtn">Penalty Taken</string>
     <string name="shotBtn">Shot</string>
     <string name="fightBtn">Fight</string>
+    <string name="blockedBtn">Shot Blocked</string>
     <string name="shotForBtn">Shot For</string>
     <string name="shotAgainstBtn">Shot Against</string>
     <string name="historyBtn">Report History</string>
