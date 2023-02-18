@@ -148,10 +148,10 @@ public class ReportActivity extends AppCompatActivity {
     private static int[] xlsxData = new int[51];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
-    private static String timeOnIceString = Integer.toString(timeOnIce/60) + " mins " + Integer.toString(timeOnIce%60) + "sec";
 
-    private static final String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken", "Possessions Won: ", "Possessions Lost: "};
-    private static String[] reportValues =  {" ", " ", " ", timeOnIceString, Integer.toString(xlsxData[38]), Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), String.valueOf(a1+a2+goals), String.valueOf(notOnGoalShots+sog), String.valueOf(sog), String.valueOf(sog*1.0/(notOnGoalShots+sog)*100) + "%", String.valueOf(fow), String.valueOf(fol), String.valueOf(fow*1.0/(fow+fol)*100)+"%", String.valueOf(pd), String.valueOf(pt), String.valueOf(possessionsWon), String.valueOf(possessionsLost) };
+
+
+    private static final String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
 
     private static final String[] columnNames = {"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
@@ -302,8 +302,8 @@ public class ReportActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    generatePDF();
                     createEmptyXLSXFile();
+                    generatePDF();
                     Toast.makeText(getBaseContext(), "REPORT CREATED!", Toast.LENGTH_SHORT).show();
                     for (Triplet event : netEvents) {
                         Log.d("NET LOCATION", "(" + event.eventType + ", " + event.x + ", " + event.y + ")");
@@ -373,7 +373,7 @@ public class ReportActivity extends AppCompatActivity {
                 hitBtn.setEnabled(false);
                 fightBtn.setEnabled(false);
                 goalBtn.setEnabled(false);
-                shotBlockedBtn.setEnabled(false);
+
 
                 if (period == 1) {
                     firstPeriod[1]++;
@@ -505,9 +505,10 @@ public class ReportActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
-
-                ReportActivity.blk++;
-                ReportActivity.shotsFor++;
+                notOnGoalShots++;
+                blk++;
+                shotsFor++;
+                Toast.makeText(getBaseContext(), "Blocked shot", Toast.LENGTH_SHORT).show();
                 buttonsEnable();
 
             }
@@ -685,7 +686,7 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     private void insertData() {
-        timeOnIce = (int)(firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
+
         if(firstPeriod[7] != 0)
             firstPeriod[4] = firstPeriod[3]*1.0f/firstPeriod[7];
         if(secondPeriod[7] != 0)
@@ -715,6 +716,8 @@ public class ReportActivity extends AppCompatActivity {
             xlsxData[k] = (int) otPeriod[i];
             k++;
         }
+        timeOnIce = (int)(firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
+
         xlsxData[k] = a1;
         k++;
         xlsxData[k] = a2;
@@ -758,8 +761,10 @@ public class ReportActivity extends AppCompatActivity {
         Document document = new Document(pageSize);
         try {
             String fileName = "pdf_file.pdf";
-            String[] reportValues =  {" ", " ", " ", timeOnIceString, Integer.toString(xlsxData[38]), Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), String.valueOf(a1+a2+goals), String.valueOf(notOnGoalShots+sog), String.valueOf(sog), String.valueOf(sog*1.0/(notOnGoalShots+sog)*100) + "%", String.valueOf(fow), String.valueOf(fol), String.valueOf(fow*1.0/(fow+fol)*100)+"%", String.valueOf(pd), String.valueOf(pt), String.valueOf(possessionsWon), String.valueOf(possessionsLost) };
-
+            String timeOnIceString = Integer.toString(timeOnIce/60) + " mins " + Integer.toString(timeOnIce%60) + " sec";
+            String[] reportValues =  {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1+a2+goals), Integer.toString(notOnGoalShots+sog), Integer.toString(sog), sog * 1.0 / (notOnGoalShots + sog) * 100 + "%", Integer.toString(fow), Integer.toString(fol), fow * 1.0 / (fow + fol) * 100 +"%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost) };
+            reportValues[3] = timeOnIceString;
+            Log.d("blk", "+++" + Integer.toString(notOnGoalShots+sog));
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
             ContentValues contentValues = new ContentValues();
@@ -799,6 +804,7 @@ public class ReportActivity extends AppCompatActivity {
             cb.setTextMatrix(0, y);
             cb.showText(reportData[2] + position);
             y-=27;
+
 
             for(int i=3; i<reportData.length; i++){
                 cb.setTextMatrix(0, y);
