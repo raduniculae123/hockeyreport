@@ -45,60 +45,6 @@ import java.util.ArrayList;
 
 public class ReportActivity extends AppCompatActivity {
 
-    private static void resetVar() {
-        goals = 0;
-        a1 = 0;
-        a2 = 0;
-        sog = 0;
-        notOnGoalShots = 0;
-        blk = 0;
-        pd = 0;
-        pt = 0;
-        fow = 0;
-        fol = 0;
-
-        shotsFor = 0; //of the team (for CORSI)
-        shotsAgainst = 0; //of the  team (for CORSI)
-
-
-        goalsFor = 0;
-        goalsAgainst = 0;
-        timeOnIce = 0;
-        shifts = 0;
-
-        possessionsWon = 0;
-        possessionsLost = 0;
-
-        hits = 0;
-
-        fights = 0;
-
-        firstPeriod = new float[8];
-        secondPeriod = new float[8];
-        thirdPeriod = new float[8];
-        otPeriod = new float[8];
-
-
-        xlsxData = new int[51];
-        fieldEvents = new ArrayList<>();
-        netEvents = new ArrayList<>();
-
-
-        reportData = new String[]{"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
-
-
-        columnNames = new String[]{"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
-
-        String name = "Radu Niculae";
-        String date = "24102021";
-        String location = "iceSheffield";
-        String teamFor = "Steaua";
-        String teamAgainst = "Brasov";
-        String position = "Right Wing";
-
-
-    }
-
     private Chronometer chronometer;
     private long pauseOffset;
     private boolean running;
@@ -196,7 +142,7 @@ public class ReportActivity extends AppCompatActivity {
     private static float[] otPeriod = new float[8];
 
 
-    private static int[] xlsxData = new int[51];
+    private static int[] xlsxData = new int[53];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
 
@@ -204,7 +150,7 @@ public class ReportActivity extends AppCompatActivity {
     private static String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
 
-    private static String[] columnNames = {"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
+    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights"};
 
     public static String name = "Radu Niculae";
     public static String date = "24102021";
@@ -815,6 +761,12 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = (int) (timeOnIce * 1.0 / shifts);
         k++;
         xlsxData[k] = goals;
+        k++;
+        xlsxData[k] = hits;
+        k++;
+        xlsxData[k] = fights;
+
+
 
     }
 
@@ -981,18 +933,24 @@ public class ReportActivity extends AppCompatActivity {
 
 
         XSSFCell cell = row1.createCell(0);
-        cell.setCellValue("Name");
+        cell.setCellValue(name);
 
         cell = row1.createCell(1);
-        cell.setCellValue("Date");
+        cell.setCellValue(date);
 
         cell = row1.createCell(2);
-        cell.setCellValue("Team against");
+        cell.setCellValue(teamFor);
 
         cell = row1.createCell(3);
-        cell.setCellValue("Location");
+        cell.setCellValue(teamAgainst);
 
-        l = 4;
+        cell = row1.createCell(4);
+        cell.setCellValue(position);
+
+        cell = row1.createCell(5);
+        cell.setCellValue(location);
+
+        l = 6;
 
 
         for (j = 0; j < xlsxData.length; j++) {
@@ -1077,6 +1035,60 @@ public class ReportActivity extends AppCompatActivity {
             this.x = x;
             this.y = y;
         }
+    }
+
+    private static void resetVar() {
+        goals = 0;
+        a1 = 0;
+        a2 = 0;
+        sog = 0;
+        notOnGoalShots = 0;
+        blk = 0;
+        pd = 0;
+        pt = 0;
+        fow = 0;
+        fol = 0;
+
+        shotsFor = 0; //of the team (for CORSI)
+        shotsAgainst = 0; //of the  team (for CORSI)
+
+
+        goalsFor = 0;
+        goalsAgainst = 0;
+        timeOnIce = 0;
+        shifts = 0;
+
+        possessionsWon = 0;
+        possessionsLost = 0;
+
+        hits = 0;
+
+        fights = 0;
+
+        firstPeriod = new float[8];
+        secondPeriod = new float[8];
+        thirdPeriod = new float[8];
+        otPeriod = new float[8];
+
+
+        xlsxData = new int[53];
+        fieldEvents = new ArrayList<>();
+        netEvents = new ArrayList<>();
+
+
+        reportData = new String[]{"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
+
+
+        columnNames = new String[]{"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights"};
+
+        String name = "Radu Niculae";
+        String date = "24102021";
+        String location = "iceSheffield";
+        String teamFor = "Steaua";
+        String teamAgainst = "Brasov";
+        String position = "Right Wing";
+
+
     }
 
 
