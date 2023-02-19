@@ -6,12 +6,11 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -28,7 +27,6 @@ import androidx.core.content.ContextCompat;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
@@ -40,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,6 +45,59 @@ import java.util.ArrayList;
 
 public class ReportActivity extends AppCompatActivity {
 
+    private static void resetVar() {
+        goals = 0;
+        a1 = 0;
+        a2 = 0;
+        sog = 0;
+        notOnGoalShots = 0;
+        blk = 0;
+        pd = 0;
+        pt = 0;
+        fow = 0;
+        fol = 0;
+
+        shotsFor = 0; //of the team (for CORSI)
+        shotsAgainst = 0; //of the  team (for CORSI)
+
+
+        goalsFor = 0;
+        goalsAgainst = 0;
+        timeOnIce = 0;
+        shifts = 0;
+
+        possessionsWon = 0;
+        possessionsLost = 0;
+
+        hits = 0;
+
+        fights = 0;
+
+        firstPeriod = new float[8];
+        secondPeriod = new float[8];
+        thirdPeriod = new float[8];
+        otPeriod = new float[8];
+
+
+        xlsxData = new int[51];
+        fieldEvents = new ArrayList<>();
+        netEvents = new ArrayList<>();
+
+
+        reportData = new String[]{"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
+
+
+        columnNames = new String[]{"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
+
+        String name = "Radu Niculae";
+        String date = "24102021";
+        String location = "iceSheffield";
+        String teamFor = "Steaua";
+        String teamAgainst = "Brasov";
+        String position = "Right Wing";
+
+
+    }
 
     private Chronometer chronometer;
     private long pauseOffset;
@@ -73,8 +123,8 @@ public class ReportActivity extends AppCompatActivity {
     private static int shotsAgainst = 0; //of the  team (for CORSI)
 
 
-    private static int goalsFor = 0;
-    private static int goalsAgainst = 0;
+    public static int goalsFor = 0;
+    public static int goalsAgainst = 0;
     private static int timeOnIce = 0;
     private static int shifts = 0;
 
@@ -86,13 +136,15 @@ public class ReportActivity extends AppCompatActivity {
     private static int fights = 0;
 
 
-
-
     private static final int REQUEST_CODE_1 = 1; //Hockey field ACTIVITY
     private static final int FIRST_ACTIVITY_REQUEST_CODE = 1;
 
     private static final int REQUEST_CODE_2 = 2; //NET ACTIVITY
     private static final int SECOND_ACTIVITY_REQUEST_CODE = 2;
+
+
+    private static final int REQUEST_CODE_3 = 3; //GameInfoActivity
+    private static final int THIRD_ACTIVITY_REQUEST_CODE = 3;
 
 
     private Button endShiftBtn;
@@ -144,23 +196,23 @@ public class ReportActivity extends AppCompatActivity {
     private static float[] otPeriod = new float[8];
 
 
-
     private static int[] xlsxData = new int[51];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
 
 
+    private static String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
-    private static final String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
+    private static String[] columnNames = {"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
 
-    private static final String[] columnNames = {"Name", "Date", "Team Against", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals"};
-    private static String name = "Radu Niculae";
-    private static String date = "24102021";
-    private static String location = "iceSheffield";
-    private static String teamFor = "Steaua";
-    private static String teamAgainst = "Brasov";
-    private static String position = "Right Wing";
+    public static String name = "Radu Niculae";
+    public static String date = "24102021";
+    public static String location = "iceSheffield";
+    public static String teamFor = "Steaua";
+    public static String teamAgainst = "Brasov";
+    public static String position = "Right Wing";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -301,20 +353,14 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    createEmptyXLSXFile();
-                    generatePDF();
-                    Toast.makeText(getBaseContext(), "REPORT CREATED!", Toast.LENGTH_SHORT).show();
-                    for (Triplet event : netEvents) {
-                        Log.d("NET LOCATION", "(" + event.eventType + ", " + event.x + ", " + event.y + ")");
-                    }
 
-                    for (Triplet event : fieldEvents) {
-                        Log.d("FIELD LOCATION", "(" + event.eventType + ", " + event.x + ", " + event.y + ")");
-                    }
-                }
+                Intent intent = new Intent(ReportActivity.this, GameInfoActivity.class);
+                startActivityForResult(intent, THIRD_ACTIVITY_REQUEST_CODE);
+
+
             }
         });
+
 
         /*----------------------------------------FACEOFFS---------------------------------------------*/
         faceOffWonBtn.setOnClickListener(new View.OnClickListener() {
@@ -515,7 +561,6 @@ public class ReportActivity extends AppCompatActivity {
         });
 
 
-
         notOnNetBtn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -667,12 +712,13 @@ public class ReportActivity extends AppCompatActivity {
                 String eventType = data.getStringExtra("goal");
                 float shotX = Float.parseFloat(data.getStringExtra("shotX"));
                 float shotY = Float.parseFloat(data.getStringExtra("shotY"));
+
                 // SHOT ON GOAL
                 if (eventType.equals("0")) {
-                    Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     Toast.makeText(this, "Goal!", Toast.LENGTH_SHORT).show();
                     buttonsEnable();
                     netEvents.add(new Triplet(eventType, shotX, shotY));
+
 
                 } else if (eventType.equals("1")) {
                     Toast.makeText(this, "Shot on net", Toast.LENGTH_SHORT).show();
@@ -683,18 +729,35 @@ public class ReportActivity extends AppCompatActivity {
             }
         }
 
+        if (requestCode == THIRD_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    createEmptyXLSXFile();
+                    generatePDF();
+                    Toast.makeText(getBaseContext(), "Report Generated", Toast.LENGTH_SHORT).show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            finish();
+                            resetVar();
+                        }
+                    }, 500);
+                }
+            }
+        }
+
     }
 
     private void insertData() {
 
-        if(firstPeriod[7] != 0)
-            firstPeriod[4] = firstPeriod[3]*1.0f/firstPeriod[7];
-        if(secondPeriod[7] != 0)
-            secondPeriod[4] = secondPeriod[3]*1.0f/secondPeriod[7];
-        if(thirdPeriod[7] != 0)
-            thirdPeriod[4] = thirdPeriod[3]*1.0f/thirdPeriod[7];
-        if(otPeriod[7] != 0)
-            otPeriod[4] = otPeriod[3]*1.0f/otPeriod[7];
+        if (firstPeriod[7] != 0)
+            firstPeriod[4] = firstPeriod[3] * 1.0f / firstPeriod[7];
+        if (secondPeriod[7] != 0)
+            secondPeriod[4] = secondPeriod[3] * 1.0f / secondPeriod[7];
+        if (thirdPeriod[7] != 0)
+            thirdPeriod[4] = thirdPeriod[3] * 1.0f / thirdPeriod[7];
+        if (otPeriod[7] != 0)
+            otPeriod[4] = otPeriod[3] * 1.0f / otPeriod[7];
         int k = 0;
         xlsxData[k] = goalsFor;
         k++;
@@ -716,7 +779,7 @@ public class ReportActivity extends AppCompatActivity {
             xlsxData[k] = (int) otPeriod[i];
             k++;
         }
-        timeOnIce = (int)(firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
+        timeOnIce = (int) (firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
 
         xlsxData[k] = a1;
         k++;
@@ -749,22 +812,22 @@ public class ReportActivity extends AppCompatActivity {
         k++;
         xlsxData[k] = shotsAgainst;
         k++;
-        xlsxData[k] = (int)(timeOnIce*1.0/shifts);
+        xlsxData[k] = (int) (timeOnIce * 1.0 / shifts);
         k++;
         xlsxData[k] = goals;
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void generatePDF() {
+    void generatePDF() {
         Rectangle pageSize = PageSize.A4.rotate();
         Document document = new Document(pageSize);
         try {
             String fileName = "pdf_file.pdf";
-            String timeOnIceString = Integer.toString(timeOnIce/60) + " mins " + Integer.toString(timeOnIce%60) + " sec";
-            String[] reportValues =  {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1+a2+goals), Integer.toString(notOnGoalShots+sog), Integer.toString(sog), sog * 1.0 / (notOnGoalShots + sog) * 100 + "%", Integer.toString(fow), Integer.toString(fol), fow * 1.0 / (fow + fol) * 100 +"%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost) };
+            String timeOnIceString = Integer.toString(timeOnIce / 60) + " mins " + Integer.toString(timeOnIce % 60) + " sec";
+            String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), sog * 1.0 / (notOnGoalShots + sog) * 100 + "%", Integer.toString(fow), Integer.toString(fol), fow * 1.0 / (fow + fol) * 100 + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
             reportValues[3] = timeOnIceString;
-            Log.d("blk", "+++" + Integer.toString(notOnGoalShots+sog));
+            Log.d("blk", "+++" + Integer.toString(notOnGoalShots + sog));
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
             ContentValues contentValues = new ContentValues();
@@ -785,36 +848,93 @@ public class ReportActivity extends AppCompatActivity {
             cb.setColorFill(BaseColor.BLUE);
             float maxHeight = pageSize.getHeight();
             float maxWidth = pageSize.getWidth();
+
+            PdfContentByte canvas = writer.getDirectContent();
+            canvas.moveTo(230, document.bottom());
+            canvas.lineTo(230, document.top());
+            canvas.stroke();
+
             // Set the text location with coordinates
             cb.beginText();
-            cb.setTextMatrix(0, 565);
-            cb.showText(name + " - " +location+ " - " + date);
+            cb.setTextMatrix(3, 565);
+            cb.showText(name + " - " + location + " - " + date);
 
 
             cb.setFontAndSize(bf, 17);
             int y = 535;
-            cb.setTextMatrix(0, y);
+            cb.setTextMatrix(3, y);
             cb.showText(reportData[0] + teamFor + " - " + goalsFor);
-            y-=27;
+            y -= 27;
 
-            cb.setTextMatrix(0, y);
+            cb.setTextMatrix(3, y);
             cb.showText(reportData[1] + teamAgainst + " - " + goalsAgainst);
-            y-=27;
+            y -= 27;
 
-            cb.setTextMatrix(0, y);
+            cb.setTextMatrix(3, y);
             cb.showText(reportData[2] + position);
-            y-=27;
+            y -= 27;
 
 
-            for(int i=3; i<reportData.length; i++){
-                cb.setTextMatrix(0, y);
+            for (int i = 3; i < reportData.length; i++) {
+                cb.setTextMatrix(3, y);
                 cb.showText(reportData[i] + reportValues[i]);
-                y-=27.5;
+                y -= 27.5;
             }
+
+            cb.setTextMatrix(3, y);
+            cb.showText("Hits: " + hits);
+            y -= 27;
+
+
+            // Each index represents a metric:
+    /*
+
+        0 - goals
+        1 - a1+a2
+        2 - sog
+        3 - time on ice in seconds
+        4 - shift avg
+        5 - possessions won
+        6 - possessions lost
+        7 - number of shifts
+
+
+
+     */
+            y = 535;
+            String[] periodNames = {"Goals: ", "Assists: ", "SOG: ", "Time on ice: ", "Possessions won: ", "Possessions lost: ", "Shifts: "};
+            cb.setTextMatrix(250, y);
+            cb.showText("Period 1: ");
+            y -= 27;
+            for (int i = 0; i < periodNames.length; i++) {
+                cb.setTextMatrix(250, y);
+                cb.showText(periodNames[i] + (int) firstPeriod[i]);
+                y -= 27;
+            }
+
+            y = 535;
+            cb.setTextMatrix(455, y);
+            cb.showText("Period 2: ");
+            y -= 27;
+            for (int i = 0; i < periodNames.length; i++) {
+                cb.setTextMatrix(455, y);
+                cb.showText(periodNames[i] + (int) secondPeriod[i]);
+                y -= 27;
+            }
+
+            y = 535;
+            cb.setTextMatrix(665, y);
+            cb.showText("Period 3: ");
+            y -= 27;
+            for (int i = 0; i < periodNames.length; i++) {
+                cb.setTextMatrix(665, y);
+                cb.showText(periodNames[i] + (int) thirdPeriod[i]);
+                y -= 27;
+            }
+
 
             cb.endText();
 
-            Log.d("GO", Integer.toString(goals));
 
 
             /*
@@ -842,7 +962,7 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void createEmptyXLSXFile() {
+    void createEmptyXLSXFile() {
         insertData();
         String fileName = "empty_file.xlsx";
 
@@ -945,6 +1065,7 @@ public class ReportActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     class Triplet {
         String eventType;
