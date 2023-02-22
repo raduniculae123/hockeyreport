@@ -780,7 +780,7 @@ public class ReportActivity extends AppCompatActivity {
         try {
             String fileName = "pdf_file.pdf";
             String timeOnIceString = Integer.toString(timeOnIce / 60) + " mins " + Integer.toString(timeOnIce % 60) + " sec";
-            String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), sog * 1.0 / (notOnGoalShots + sog) * 100 + "%", Integer.toString(fow), Integer.toString(fol), fow * 1.0 / (fow + fol) * 100 + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
+            String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), (int)(sog * 1.0 / (notOnGoalShots + sog)) * 100 + "%", Integer.toString(fow), Integer.toString(fol), (int)(fow * 1.0 / (fow + fol) * 100) + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
             reportValues[3] = timeOnIceString;
 
             // Get the content resolver and create a new file
@@ -799,6 +799,7 @@ public class ReportActivity extends AppCompatActivity {
             // Create a PdfContentByte instance and set the font
             PdfContentByte cb = writer.getDirectContent();
             BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            BaseFont bfBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
             cb.setFontAndSize(bf, 40);
             cb.setColorFill(BaseColor.BLUE);
             float maxHeight = pageSize.getHeight();
@@ -891,35 +892,40 @@ public class ReportActivity extends AppCompatActivity {
 
             int netX = 205;
             int netY = 50;
-
             Bitmap bmp1 = BitmapFactory.decodeResource(getResources(), R.drawable.net);
-
             ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
             bmp1.compress(Bitmap.CompressFormat.PNG, 100, stream1);
             Image image1 = Image.getInstance(stream1.toByteArray());
-
             image1.setAbsolutePosition(netX, netY);
             image1.scaleToFit(300, 300);
-
             cb.addImage(image1);
 
-            Bitmap bmp2 = BitmapFactory.decodeResource(getResources(), R.drawable.puck);
 
+            int rinkX = 500;
+            int rinkY = 30;
+            Bitmap bmp4 = BitmapFactory.decodeResource(getResources(), R.drawable.hockeyrink);
+            ByteArrayOutputStream stream4 = new ByteArrayOutputStream();
+            bmp4.compress(Bitmap.CompressFormat.PNG, 100, stream4);
+            Image image4 = Image.getInstance(stream4.toByteArray());
+            image4.setAbsolutePosition(rinkX, rinkY);
+
+            image4.scaleToFit(330, 330);
+            cb.addImage(image4);
+
+
+            Bitmap bmp2 = BitmapFactory.decodeResource(getResources(), R.drawable.puck);
             ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
             bmp2.compress(Bitmap.CompressFormat.PNG, 100, stream2);
             Image image2 = Image.getInstance(stream2.toByteArray());
             image2.scaleToFit(25, 12);
 
             Bitmap bmp3 = BitmapFactory.decodeResource(getResources(), R.drawable.puckgold);
-
             ByteArrayOutputStream stream3 = new ByteArrayOutputStream();
             bmp3.compress(Bitmap.CompressFormat.PNG, 100, stream3);
             Image image3 = Image.getInstance(stream3.toByteArray());
 
 
             image3.scaleToFit(25, 12);
-
-
 
 
             for (int j = 0; j < netEvents.size(); j++) {
@@ -935,6 +941,71 @@ public class ReportActivity extends AppCompatActivity {
                 }
 
             }
+
+
+            for (int j = 0; j < fieldEvents.size(); j++) {
+                float xEvent = fieldEvents.get(j).x/2.9f;
+                float yEvent = fieldEvents.get(j).y/2.9f;
+                if(fieldEvents.get(j).eventType.equals("0")){
+                    cb.setColorFill(BaseColor.ORANGE);
+                }
+                else if(fieldEvents.get(j).eventType.equals("1")){
+                    cb.setColorFill(BaseColor.BLUE);
+                }
+                else if(fieldEvents.get(j).eventType.equals("2")){
+                    cb.setColorFill(BaseColor.CYAN);
+                }
+                else if(fieldEvents.get(j).eventType.equals("3")){
+                    cb.setColorFill(BaseColor.GREEN);
+                }
+                else if(fieldEvents.get(j).eventType.equals("4")){
+                    cb.setColorFill(BaseColor.MAGENTA);
+                }
+                else if(fieldEvents.get(j).eventType.equals("5")){
+                    cb.setColorFill(BaseColor.RED);
+                }
+                cb.setLineWidth(0.9f);
+                cb.circle(xEvent*2.75f/2.9f + rinkX + 12, 330/1.85f - (yEvent*2.75f/2.9f) + rinkY, 5f);
+                cb.fill();
+
+            }
+
+            cb.setColorFill(BaseColor.ORANGE);
+            cb.setTextMatrix(240, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("GOAL");
+
+            cb.setColorFill(BaseColor.BLUE);
+            cb.setTextMatrix(300, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("SOG");
+
+            cb.setColorFill(BaseColor.CYAN);
+            cb.setTextMatrix(355, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("MISS NET");
+
+            cb.setColorFill(BaseColor.GREEN);
+            cb.setTextMatrix(450, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("1st Assist");
+
+            cb.setColorFill(BaseColor.MAGENTA);
+            cb.setTextMatrix(550, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("Poss WON");
+
+
+            cb.setColorFill(BaseColor.RED);
+            cb.setTextMatrix(650, 220);
+            cb.setFontAndSize(bfBold, 17);
+            cb.showText("Poss LOST");
+
+
+            cb.setColorFill(BaseColor.BLACK);
+            cb.setTextMatrix(240, 280);
+            cb.setFontAndSize(bfBold, 25);
+            cb.showText("Performance Score: ");
 
 
             canvas.moveTo(230, document.bottom());
