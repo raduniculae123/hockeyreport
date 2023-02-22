@@ -6,6 +6,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import androidx.core.content.ContextCompat;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
@@ -38,6 +41,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -767,7 +771,6 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = fights;
 
 
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -779,7 +782,7 @@ public class ReportActivity extends AppCompatActivity {
             String timeOnIceString = Integer.toString(timeOnIce / 60) + " mins " + Integer.toString(timeOnIce % 60) + " sec";
             String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), sog * 1.0 / (notOnGoalShots + sog) * 100 + "%", Integer.toString(fow), Integer.toString(fol), fow * 1.0 / (fow + fol) * 100 + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
             reportValues[3] = timeOnIceString;
-            Log.d("blk", "+++" + Integer.toString(notOnGoalShots + sog));
+
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
             ContentValues contentValues = new ContentValues();
@@ -802,9 +805,7 @@ public class ReportActivity extends AppCompatActivity {
             float maxWidth = pageSize.getWidth();
 
             PdfContentByte canvas = writer.getDirectContent();
-            canvas.moveTo(230, document.bottom());
-            canvas.lineTo(230, document.top());
-            canvas.stroke();
+
 
             // Set the text location with coordinates
             cb.beginText();
@@ -888,23 +889,58 @@ public class ReportActivity extends AppCompatActivity {
             cb.endText();
 
 
+            int netX = 205;
+            int netY = 50;
 
-            /*
-            // Load the image from the drawable resource
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.net);
+            Bitmap bmp1 = BitmapFactory.decodeResource(getResources(), R.drawable.net);
 
-            // Create an Image object from the bitmap
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            Image image = Image.getInstance(stream.toByteArray());
+            ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+            bmp1.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+            Image image1 = Image.getInstance(stream1.toByteArray());
 
-            // Set the image position and size
-            image.setAbsolutePosition(100, 100);
-            image.scaleToFit(400, 400);
+            image1.setAbsolutePosition(netX, netY);
+            image1.scaleToFit(300, 300);
 
-            // Add the image to the PDF
-            cb.addImage(image);
-            */
+            cb.addImage(image1);
+
+            Bitmap bmp2 = BitmapFactory.decodeResource(getResources(), R.drawable.puck);
+
+            ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+            bmp2.compress(Bitmap.CompressFormat.PNG, 100, stream2);
+            Image image2 = Image.getInstance(stream2.toByteArray());
+            image2.scaleToFit(25, 12);
+
+            Bitmap bmp3 = BitmapFactory.decodeResource(getResources(), R.drawable.puckgold);
+
+            ByteArrayOutputStream stream3 = new ByteArrayOutputStream();
+            bmp3.compress(Bitmap.CompressFormat.PNG, 100, stream3);
+            Image image3 = Image.getInstance(stream3.toByteArray());
+
+
+            image3.scaleToFit(25, 12);
+
+
+
+
+            for (int j = 0; j < netEvents.size(); j++) {
+                float xShot = netEvents.get(j).x/9.06f - 3;
+                float yShot = netEvents.get(j).y/9.1f;
+                if(netEvents.get(j).eventType.equals("0")){
+                    image3.setAbsolutePosition(netX + xShot, netY + yShot);
+                    cb.addImage(image3);
+                }
+                else {
+                    image2.setAbsolutePosition(netX + xShot, netY + yShot);
+                    cb.addImage(image2);
+                }
+
+            }
+
+
+            canvas.moveTo(230, document.bottom());
+            canvas.lineTo(230, document.top());
+            canvas.stroke();
+
             document.close();
 
             Log.d("PDF", "Report Created");
@@ -912,6 +948,7 @@ public class ReportActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     void createEmptyXLSXFile() {

@@ -11,6 +11,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -76,8 +77,10 @@ public class NetView extends View {
             String goal = netActivity.getGoal();
             Intent resultIntent = new Intent();
             resultIntent.putExtra("shotX", Float.toString(x));
-            resultIntent.putExtra("shotY", Float.toString(y));
+            resultIntent.putExtra("shotY", Float.toString(getHeight()-y));
             resultIntent.putExtra("goal", goal);
+
+            Log.d("coord", Float.toString(x) + "    " + Float.toString(getHeight()-y));
 
             new Handler().postDelayed(new Runnable() {
                 @Override
