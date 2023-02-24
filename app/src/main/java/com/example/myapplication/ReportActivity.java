@@ -42,10 +42,13 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -682,8 +685,10 @@ public class ReportActivity extends AppCompatActivity {
         if (requestCode == THIRD_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    createEmptyXLSXFile();
+                    //dataXLSXFile();
                     generatePDF();
+                    coordCSVFile();
+                    dataCSVFile();
                     Toast.makeText(getBaseContext(), "Report Generated", Toast.LENGTH_SHORT).show();
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -778,9 +783,9 @@ public class ReportActivity extends AppCompatActivity {
         Rectangle pageSize = PageSize.A4.rotate();
         Document document = new Document(pageSize);
         try {
-            String fileName = "pdf_file.pdf";
+            String fileName = "REPORT" + date + name + ".pdf";
             String timeOnIceString = Integer.toString(timeOnIce / 60) + " mins " + Integer.toString(timeOnIce % 60) + " sec";
-            String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), (int)(sog * 1.0 / (notOnGoalShots + sog)) * 100 + "%", Integer.toString(fow), Integer.toString(fol), (int)(fow * 1.0 / (fow + fol) * 100) + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
+            String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), (int) ((sog * 1.0 / (notOnGoalShots + sog)) * 100) + "%", Integer.toString(fow), Integer.toString(fol), (int) ((fow * 1.0 / (fow + fol) * 100)) + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
             reportValues[3] = timeOnIceString;
 
             // Get the content resolver and create a new file
@@ -856,14 +861,17 @@ public class ReportActivity extends AppCompatActivity {
 
      */
             y = 535;
-            String[] periodNames = {"Goals: ", "Assists: ", "SOG: ", "Time on ice: ", "Possessions won: ", "Possessions lost: ", "Shifts: "};
+            String[] periodNames = {"Goals: ", "Assists: ", "SOG: ", "Time on ice: ", " ", "Possessions won: ", "Possessions lost: ", "Shifts: "};
             cb.setTextMatrix(250, y);
             cb.showText("Period 1: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                cb.setTextMatrix(250, y);
-                cb.showText(periodNames[i] + (int) firstPeriod[i]);
-                y -= 27;
+                if (i != 4) {
+                    cb.setTextMatrix(250, y);
+                    cb.showText(periodNames[i] + (int) firstPeriod[i]);
+                    y -= 27;
+                }
+
             }
 
             y = 535;
@@ -871,9 +879,11 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 2: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                cb.setTextMatrix(455, y);
-                cb.showText(periodNames[i] + (int) secondPeriod[i]);
-                y -= 27;
+                if (i != 4) {
+                    cb.setTextMatrix(455, y);
+                    cb.showText(periodNames[i] + (int) secondPeriod[i]);
+                    y -= 27;
+                }
             }
 
             y = 535;
@@ -881,9 +891,11 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 3: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                cb.setTextMatrix(665, y);
-                cb.showText(periodNames[i] + (int) thirdPeriod[i]);
-                y -= 27;
+                if (i != 4) {
+                    cb.setTextMatrix(665, y);
+                    cb.showText(periodNames[i] + (int) thirdPeriod[i]);
+                    y -= 27;
+                }
             }
 
 
@@ -929,13 +941,12 @@ public class ReportActivity extends AppCompatActivity {
 
 
             for (int j = 0; j < netEvents.size(); j++) {
-                float xShot = netEvents.get(j).x/9.06f - 3;
-                float yShot = netEvents.get(j).y/9.1f;
-                if(netEvents.get(j).eventType.equals("0")){
+                float xShot = netEvents.get(j).x / 9.06f - 3;
+                float yShot = netEvents.get(j).y / 9.1f;
+                if (netEvents.get(j).eventType.equals("0")) {
                     image3.setAbsolutePosition(netX + xShot, netY + yShot);
                     cb.addImage(image3);
-                }
-                else {
+                } else {
                     image2.setAbsolutePosition(netX + xShot, netY + yShot);
                     cb.addImage(image2);
                 }
@@ -944,28 +955,23 @@ public class ReportActivity extends AppCompatActivity {
 
 
             for (int j = 0; j < fieldEvents.size(); j++) {
-                float xEvent = fieldEvents.get(j).x/2.9f;
-                float yEvent = fieldEvents.get(j).y/2.9f;
-                if(fieldEvents.get(j).eventType.equals("0")){
+                float xEvent = fieldEvents.get(j).x / 2.9f;
+                float yEvent = fieldEvents.get(j).y / 2.9f;
+                if (fieldEvents.get(j).eventType.equals("0")) {
                     cb.setColorFill(BaseColor.ORANGE);
-                }
-                else if(fieldEvents.get(j).eventType.equals("1")){
+                } else if (fieldEvents.get(j).eventType.equals("1")) {
                     cb.setColorFill(BaseColor.BLUE);
-                }
-                else if(fieldEvents.get(j).eventType.equals("2")){
+                } else if (fieldEvents.get(j).eventType.equals("2")) {
                     cb.setColorFill(BaseColor.CYAN);
-                }
-                else if(fieldEvents.get(j).eventType.equals("3")){
+                } else if (fieldEvents.get(j).eventType.equals("3")) {
                     cb.setColorFill(BaseColor.GREEN);
-                }
-                else if(fieldEvents.get(j).eventType.equals("4")){
+                } else if (fieldEvents.get(j).eventType.equals("4")) {
                     cb.setColorFill(BaseColor.MAGENTA);
-                }
-                else if(fieldEvents.get(j).eventType.equals("5")){
+                } else if (fieldEvents.get(j).eventType.equals("5")) {
                     cb.setColorFill(BaseColor.RED);
                 }
                 cb.setLineWidth(0.9f);
-                cb.circle(xEvent*2.75f/2.9f + rinkX + 12, 330/1.85f - (yEvent*2.75f/2.9f) + rinkY, 5f);
+                cb.circle(xEvent * 2.75f / 2.9f + rinkX + 12, 330 / 1.85f - (yEvent * 2.75f / 2.9f) + rinkY, 5f);
                 cb.fill();
 
             }
@@ -1022,9 +1028,9 @@ public class ReportActivity extends AppCompatActivity {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    void createEmptyXLSXFile() {
+    void dataXLSXFile() {
         insertData();
-        String fileName = "empty_file.xlsx";
+        String fileName = "DATA" + date + ".xlsx";
 
         // Create a new XSSFWorkbook
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -1067,51 +1073,6 @@ public class ReportActivity extends AppCompatActivity {
             l++;
         }
 
-        for (k = 0; k < netEvents.size(); k++) {
-            cell = row0.createCell(i);
-            cell.setCellValue("netType");
-            cell = row0.createCell(i + 1);
-            cell.setCellValue("netX");
-            cell = row0.createCell(i + 2);
-            cell.setCellValue("netY");
-            i += 3;
-        }
-
-        for (k = 0; k < fieldEvents.size(); k++) {
-            cell = row0.createCell(i);
-            cell.setCellValue("fieldType");
-            cell = row0.createCell(i + 1);
-            cell.setCellValue("fieldX");
-            cell = row0.createCell(i + 2);
-            cell.setCellValue("fieldY");
-            i += 3;
-        }
-
-        for (j = 0; j < netEvents.size(); j++) {
-            cell = row1.createCell(l);
-            cell.setCellValue(netEvents.get(j).eventType);
-            l++;
-            cell = row1.createCell(l);
-            cell.setCellValue(netEvents.get(j).x);
-            l++;
-            cell = row1.createCell(l);
-            cell.setCellValue(netEvents.get(j).y);
-            l++;
-        }
-
-        for (j = 0; j < fieldEvents.size(); j++) {
-            cell = row1.createCell(l);
-            cell.setCellValue(fieldEvents.get(j).eventType);
-            l++;
-            cell = row1.createCell(l);
-            cell.setCellValue(fieldEvents.get(j).x);
-            l++;
-            cell = row1.createCell(l);
-            cell.setCellValue(fieldEvents.get(j).y);
-            l++;
-        }
-
-
         // Save the file to the Downloads directory
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
@@ -1127,6 +1088,90 @@ public class ReportActivity extends AppCompatActivity {
             outputStream.close();
             workbook.close();
             Log.d("XLSX", "File created");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    void dataCSVFile() {
+        insertData();
+        String fileName = "DATACSV" + date + ".csv";
+
+        try {
+            // Create a new CSV file in the Downloads directory
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+            PrintWriter pw = new PrintWriter(file);
+
+            // Write column names
+            pw.println(String.join(",", columnNames));
+
+            // Write row data
+            StringBuilder sb = new StringBuilder();
+            sb.append(name).append(",").append(date).append(",").append(teamFor).append(",")
+                    .append(teamAgainst).append(",").append(position).append(",").append(location);
+            for (int j = 0; j < xlsxData.length; j++) {
+                sb.append(",").append(xlsxData[j]);
+            }
+            pw.println(sb.toString());
+
+            pw.close();
+            Log.d("CSV", "File created");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    void coordCSVFile() {
+        try {
+            // Create an empty data array
+            String[][] data = {};
+
+            for (int j = 0; j < netEvents.size(); j++) {
+                // Get the eventType, x, and y values from the current Triplet object
+                String eventType = netEvents.get(j).eventType;
+                float x = netEvents.get(j).x;
+                float y = netEvents.get(j).y;
+
+                // Create a new row in the data array with these values
+                String[] row = {"Net", eventType, String.valueOf(x), String.valueOf(y)};
+                data = Arrays.copyOf(data, data.length + 1);
+                data[data.length - 1] = row;
+            }
+
+            for (int j = 0; j < fieldEvents.size(); j++) {
+                // Get the eventType, x, and y values from the current Triplet object
+                String eventType = fieldEvents.get(j).eventType;
+                float x = fieldEvents.get(j).x;
+                float y = fieldEvents.get(j).y;
+
+                // Create a new row in the data array with these values
+                String[] row = {"Field", eventType, String.valueOf(x), String.valueOf(y)};
+                data = Arrays.copyOf(data, data.length + 1);
+                data[data.length - 1] = row;
+            }
+
+            String fileName = "COORD" + date + ".csv";
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+
+            // Check if the file already exists
+
+
+            PrintWriter pw = new PrintWriter(file);
+
+            // Write headers
+            pw.println("Field/Net,Event Type,X Coord,Y Coord");
+
+            // Write data
+            for (String[] row : data) {
+                pw.println(String.join(",", row));
+            }
+
+            pw.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
