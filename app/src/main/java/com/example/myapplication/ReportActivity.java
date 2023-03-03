@@ -15,10 +15,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,8 +50,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -128,6 +134,12 @@ public class ReportActivity extends AppCompatActivity {
 
     private Button shotBlockedBtn;
 
+    private static EditText minutesEvent;
+
+    private static EditText secondsEvent;
+
+
+    private static int seconds, minutes;
     // Each index represents a metric:
     /*
 
@@ -202,6 +214,8 @@ public class ReportActivity extends AppCompatActivity {
         firstAssistBtn = findViewById(R.id.firstAssistBtn);
         secondAssistBtn = findViewById(R.id.secondAssistBtn);
         shotBlockedBtn = findViewById(R.id.shotBlockedBtn);
+        minutesEvent = findViewById(R.id.minutesInput);
+        secondsEvent = findViewById(R.id.secondsInput);
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -212,6 +226,8 @@ public class ReportActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
+                minutesEvent.setText("");
+                secondsEvent.setText("");
                 prevPeriodBtn.setEnabled(true);
                 period++;
                 Toast.makeText(getBaseContext(), "Next period", Toast.LENGTH_SHORT).show();
@@ -230,6 +246,8 @@ public class ReportActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
+                minutesEvent.setText("");
+                secondsEvent.setText("");
                 nextPeriodBtn.setEnabled(true);
                 Toast.makeText(getBaseContext(), "Previous period", Toast.LENGTH_SHORT).show();
                 period--;
@@ -591,6 +609,69 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
+        minutesEvent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                String minutes = s.toString();
+
+                if (!minutes.isEmpty()) {
+                    int minutesNumber = Integer.parseInt(minutes);
+
+                    if (period*20 <= minutesNumber || (period-1)*20 > minutesNumber ) {
+                        Toast.makeText(getBaseContext(), "Invalid Time", Toast.LENGTH_SHORT).show();
+                        buttonsDisable();
+                    } else {
+                        Toast.makeText(getBaseContext(), "Valid Time", Toast.LENGTH_SHORT).show();
+                        ReportActivity.minutes = minutesNumber;
+                        buttonsEnable2();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+
+        secondsEvent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                String seconds = s.toString();
+
+                if (!seconds.isEmpty()) {
+                    int secondsNumber = Integer.parseInt(seconds);
+
+                    if (secondsNumber >= 60) {
+                        Toast.makeText(getBaseContext(), "Invalid Time", Toast.LENGTH_SHORT).show();
+                        buttonsDisable();
+                    } else {
+                        Toast.makeText(getBaseContext(), "Valid Time", Toast.LENGTH_SHORT).show();
+                        ReportActivity.seconds = secondsNumber;
+                        buttonsEnable2();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
     }
 
     protected void buttonsEnable() {
@@ -614,6 +695,24 @@ public class ReportActivity extends AppCompatActivity {
         goalBtn.setEnabled(true);
     }
 
+    protected void buttonsDisable() {
+        possessionWonBtn.setEnabled(false);
+        possessionLostBtn.setEnabled(false);
+        assistBtn.setEnabled(false);
+        goalBtn.setEnabled(false);
+        shotBtn.setEnabled(false);
+
+    }
+
+    protected void buttonsEnable2() {
+        possessionWonBtn.setEnabled(true);
+        possessionLostBtn.setEnabled(true);
+        assistBtn.setEnabled(true);
+        goalBtn.setEnabled(true);
+        shotBtn.setEnabled(true);
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -625,35 +724,35 @@ public class ReportActivity extends AppCompatActivity {
                 float eventY = Float.parseFloat(data.getStringExtra("eventY"));
                 // GOAL
                 if (eventType.equals("0")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     myIntent.putExtra("goal", "0");
                     startActivityForResult(myIntent, REQUEST_CODE_2);
                     // SHOT ON NET
                 } else if (eventType.equals("1")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Intent myIntent = new Intent(ReportActivity.this, NetActivity.class);
                     myIntent.putExtra("goal", "1");
                     startActivityForResult(myIntent, REQUEST_CODE_2);
                 }
                 // SHOT NOT ON NET
                 else if (eventType.equals("2")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Toast.makeText(this, "Shot NOT on net", Toast.LENGTH_SHORT).show();
                 }
                 // 1st ASSIST
                 else if (eventType.equals("3")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Toast.makeText(this, "1st Assist", Toast.LENGTH_SHORT).show();
                 }
                 // POSSESSION WON
                 else if (eventType.equals("4")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Toast.makeText(this, "Possession won", Toast.LENGTH_SHORT).show();
                 }
                 // POSSESSION LOST
                 else if (eventType.equals("5")) {
-                    fieldEvents.add(new Triplet(eventType, eventX, eventY));
+                    fieldEvents.add(new Triplet(eventType, eventX, eventY, minutes, seconds));
                     Toast.makeText(this, "Possession lost", Toast.LENGTH_SHORT).show();
                 }
 
@@ -666,17 +765,18 @@ public class ReportActivity extends AppCompatActivity {
                 float shotX = Float.parseFloat(data.getStringExtra("shotX"));
                 float shotY = Float.parseFloat(data.getStringExtra("shotY"));
 
+
                 // SHOT ON GOAL
                 if (eventType.equals("0")) {
                     Toast.makeText(this, "Goal!", Toast.LENGTH_SHORT).show();
                     buttonsEnable();
-                    netEvents.add(new Triplet(eventType, shotX, shotY));
+                    netEvents.add(new Triplet(eventType, shotX, shotY, minutes, seconds));
 
 
                 } else if (eventType.equals("1")) {
                     Toast.makeText(this, "Shot on net", Toast.LENGTH_SHORT).show();
                     buttonsEnable();
-                    netEvents.add(new Triplet(eventType, shotX, shotY));
+                    netEvents.add(new Triplet(eventType, shotX, shotY, minutes, seconds));
                 }
 
             }
@@ -813,10 +913,22 @@ public class ReportActivity extends AppCompatActivity {
             PdfContentByte canvas = writer.getDirectContent();
 
 
+            SimpleDateFormat inputFormat = new SimpleDateFormat("ddMMyyyy");
+            Date dateFormat = null;
+            try {
+                dateFormat = inputFormat.parse(date);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(dateFormat);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy");
+            String outputDateString = outputFormat.format(calendar.getTime());
+
             // Set the text location with coordinates
             cb.beginText();
             cb.setTextMatrix(3, 565);
-            cb.showText(name + " - " + location + " - " + date);
+            cb.showText(name + " - " + location + " - " + outputDateString);
 
 
             cb.setFontAndSize(bf, 17);
@@ -1028,6 +1140,177 @@ public class ReportActivity extends AppCompatActivity {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
+    void dataCSVFile() {
+        insertData();
+        String fileName = "DATACSV" + date + ".csv";
+
+        try {
+            // Create a new CSV file in the Downloads directory
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+            PrintWriter pw = new PrintWriter(file);
+
+            // Write column names
+            pw.println(String.join(",", columnNames));
+
+
+            SimpleDateFormat inputFormat = new SimpleDateFormat("ddMMyyyy");
+            Date dateFormat = null;
+            try {
+                dateFormat = inputFormat.parse(date);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(dateFormat);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy");
+            String outputDateString = outputFormat.format(calendar.getTime());
+            // Write row data
+            StringBuilder sb = new StringBuilder();
+            sb.append(name).append(",").append(outputDateString).append(",").append(teamFor).append(",")
+                    .append(teamAgainst).append(",").append(position).append(",").append(location);
+            for (int j = 0; j < xlsxData.length; j++) {
+                sb.append(",").append(xlsxData[j]);
+            }
+            pw.println(sb.toString());
+
+            pw.close();
+            Log.d("CSV", "File created");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    void coordCSVFile() {
+        try {
+            // Create an empty data array
+            String[][] data = {};
+
+            for (int j = 0; j < netEvents.size(); j++) {
+                // Get the eventType, x, and y values from the current Triplet object
+                String eventType = netEvents.get(j).eventType;
+                float x = netEvents.get(j).x;
+                float y = netEvents.get(j).y;
+                int min = netEvents.get(j).m;
+                int sec = netEvents.get(j).s;
+
+                // Create a new row in the data array with these values
+                String[] row = {"Net", eventType, String.valueOf(x), String.valueOf(y), min + ":" + sec};
+                data = Arrays.copyOf(data, data.length + 1);
+                data[data.length - 1] = row;
+            }
+
+            for (int j = 0; j < fieldEvents.size(); j++) {
+                // Get the eventType, x, and y values from the current Triplet object
+                String eventType = fieldEvents.get(j).eventType;
+                float x = fieldEvents.get(j).x;
+                float y = fieldEvents.get(j).y;
+                int min = fieldEvents.get(j).m;
+                int sec = fieldEvents.get(j).s;
+
+                // Create a new row in the data array with these values
+                String[] row = {"Field", eventType, String.valueOf(x), String.valueOf(y), min + ":" + sec};
+                data = Arrays.copyOf(data, data.length + 1);
+                data[data.length - 1] = row;
+            }
+
+            String fileName = "COORD" + date + ".csv";
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+
+            // Check if the file already exists
+
+
+            PrintWriter pw = new PrintWriter(file);
+
+            // Write headers
+            pw.println("Field/Net,Event Type,X Coord,Y Coord,Time");
+
+            // Write data
+            for (String[] row : data) {
+                pw.println(String.join(",", row));
+            }
+
+            pw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    class Triplet {
+        String eventType;
+        float x;
+        float y;
+        int m;
+        int s;
+
+        public Triplet(String eventType, float x, float y, int m, int s) {
+            this.eventType = eventType;
+            this.x = x;
+            this.y = y;
+            this.m = m;
+            this.s = s;
+        }
+    }
+
+    private static void resetVar() {
+        goals = 0;
+        a1 = 0;
+        a2 = 0;
+        sog = 0;
+        notOnGoalShots = 0;
+        blk = 0;
+        pd = 0;
+        pt = 0;
+        fow = 0;
+        fol = 0;
+
+        shotsFor = 0; //of the team (for CORSI)
+        shotsAgainst = 0; //of the  team (for CORSI)
+
+
+        goalsFor = 0;
+        goalsAgainst = 0;
+        timeOnIce = 0;
+        shifts = 0;
+
+        possessionsWon = 0;
+        possessionsLost = 0;
+
+        hits = 0;
+
+        fights = 0;
+
+        firstPeriod = new float[8];
+        secondPeriod = new float[8];
+        thirdPeriod = new float[8];
+        otPeriod = new float[8];
+
+
+        xlsxData = new int[53];
+        fieldEvents = new ArrayList<>();
+        netEvents = new ArrayList<>();
+
+
+        reportData = new String[]{"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
+
+
+        columnNames = new String[]{"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights"};
+
+        String name = "Radu Niculae";
+        String date = "24102021";
+        String location = "iceSheffield";
+        String teamFor = "Steaua";
+        String teamAgainst = "Brasov";
+        String position = "Right Wing";
+
+
+    }
+/*
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     void dataXLSXFile() {
         insertData();
         String fileName = "DATA" + date + ".xlsx";
@@ -1092,157 +1375,6 @@ public class ReportActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    void dataCSVFile() {
-        insertData();
-        String fileName = "DATACSV" + date + ".csv";
-
-        try {
-            // Create a new CSV file in the Downloads directory
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
-            PrintWriter pw = new PrintWriter(file);
-
-            // Write column names
-            pw.println(String.join(",", columnNames));
-
-            // Write row data
-            StringBuilder sb = new StringBuilder();
-            sb.append(name).append(",").append(date).append(",").append(teamFor).append(",")
-                    .append(teamAgainst).append(",").append(position).append(",").append(location);
-            for (int j = 0; j < xlsxData.length; j++) {
-                sb.append(",").append(xlsxData[j]);
-            }
-            pw.println(sb.toString());
-
-            pw.close();
-            Log.d("CSV", "File created");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    void coordCSVFile() {
-        try {
-            // Create an empty data array
-            String[][] data = {};
-
-            for (int j = 0; j < netEvents.size(); j++) {
-                // Get the eventType, x, and y values from the current Triplet object
-                String eventType = netEvents.get(j).eventType;
-                float x = netEvents.get(j).x;
-                float y = netEvents.get(j).y;
-
-                // Create a new row in the data array with these values
-                String[] row = {"Net", eventType, String.valueOf(x), String.valueOf(y)};
-                data = Arrays.copyOf(data, data.length + 1);
-                data[data.length - 1] = row;
-            }
-
-            for (int j = 0; j < fieldEvents.size(); j++) {
-                // Get the eventType, x, and y values from the current Triplet object
-                String eventType = fieldEvents.get(j).eventType;
-                float x = fieldEvents.get(j).x;
-                float y = fieldEvents.get(j).y;
-
-                // Create a new row in the data array with these values
-                String[] row = {"Field", eventType, String.valueOf(x), String.valueOf(y)};
-                data = Arrays.copyOf(data, data.length + 1);
-                data[data.length - 1] = row;
-            }
-
-            String fileName = "COORD" + date + ".csv";
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
-
-            // Check if the file already exists
-
-
-            PrintWriter pw = new PrintWriter(file);
-
-            // Write headers
-            pw.println("Field/Net,Event Type,X Coord,Y Coord");
-
-            // Write data
-            for (String[] row : data) {
-                pw.println(String.join(",", row));
-            }
-
-            pw.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    class Triplet {
-        String eventType;
-        float x;
-        float y;
-
-        public Triplet(String eventType, float x, float y) {
-            this.eventType = eventType;
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    private static void resetVar() {
-        goals = 0;
-        a1 = 0;
-        a2 = 0;
-        sog = 0;
-        notOnGoalShots = 0;
-        blk = 0;
-        pd = 0;
-        pt = 0;
-        fow = 0;
-        fol = 0;
-
-        shotsFor = 0; //of the team (for CORSI)
-        shotsAgainst = 0; //of the  team (for CORSI)
-
-
-        goalsFor = 0;
-        goalsAgainst = 0;
-        timeOnIce = 0;
-        shifts = 0;
-
-        possessionsWon = 0;
-        possessionsLost = 0;
-
-        hits = 0;
-
-        fights = 0;
-
-        firstPeriod = new float[8];
-        secondPeriod = new float[8];
-        thirdPeriod = new float[8];
-        otPeriod = new float[8];
-
-
-        xlsxData = new int[53];
-        fieldEvents = new ArrayList<>();
-        netEvents = new ArrayList<>();
-
-
-        reportData = new String[]{"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
-
-
-        columnNames = new String[]{"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights"};
-
-        String name = "Radu Niculae";
-        String date = "24102021";
-        String location = "iceSheffield";
-        String teamFor = "Steaua";
-        String teamAgainst = "Brasov";
-        String position = "Right Wing";
-
-
-    }
-
+*/
 
 }

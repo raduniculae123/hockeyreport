@@ -397,4 +397,36 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.008" />
 
+    <EditText
+        android:id="@+id/minutesInput"
+        android:layout_width="198dp"
+        android:layout_height="82dp"
+        android:ems="10"
+        android:hint="mm"
+        android:inputType="number"
+        android:textAlignment="center"
+        android:textSize="34sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.394"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.583" />
+
+    <EditText
+        android:id="@+id/secondsInput"
+        android:layout_width="198dp"
+        android:layout_height="82dp"
+        android:ems="10"
+        android:hint="ss"
+        android:inputType="number"
+        android:textAlignment="center"
+        android:textSize="34sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.615"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.583" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
