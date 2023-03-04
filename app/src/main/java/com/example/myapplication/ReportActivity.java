@@ -78,8 +78,8 @@ public class ReportActivity extends AppCompatActivity {
     private static int fow = 0;
     private static int fol = 0;
 
-    private static int shotsFor = 0; //of the team (for CORSI)
-    private static int shotsAgainst = 0; //of the  team (for CORSI)
+    private static int shotsFor = 0; //of the team (CORSI FOR)
+    private static int shotsAgainst = 0; //of the  team (CORSI AGAINST)
 
 
     public static int goalsFor = 0;
@@ -834,6 +834,7 @@ public class ReportActivity extends AppCompatActivity {
             xlsxData[k] = (int) otPeriod[i];
             k++;
         }
+
         timeOnIce = (int) (firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
 
         xlsxData[k] = a1;
@@ -884,10 +885,12 @@ public class ReportActivity extends AppCompatActivity {
         Document document = new Document(pageSize);
         try {
             String fileName = "REPORT" + date + name + ".pdf";
-            String timeOnIceString = Integer.toString(timeOnIce / 60) + " mins " + Integer.toString(timeOnIce % 60) + " sec";
+            timeOnIce = (int) (firstPeriod[3] + secondPeriod[3] + thirdPeriod[3] + otPeriod[3]);
+            String timeOnIceString = timeOnIce / 60 + " mins " + timeOnIce % 60 + " sec";
             String[] reportValues = {" ", " ", " ", " ", Integer.toString(xlsxData[49]), Integer.toString(goals), Integer.toString(a1), String.valueOf(a2), Integer.toString(a1 + a2 + goals), Integer.toString(notOnGoalShots + sog), Integer.toString(sog), (int) ((sog * 1.0 / (notOnGoalShots + sog)) * 100) + "%", Integer.toString(fow), Integer.toString(fol), (int) ((fow * 1.0 / (fow + fol) * 100)) + "%", Integer.toString(pd), Integer.toString(pt), Integer.toString(possessionsWon), Integer.toString(possessionsLost)};
             reportValues[3] = timeOnIceString;
-
+            reportValues[4] = String.valueOf((int) (timeOnIce * 1.0 / shifts));
+            reportValues[4] = Integer.valueOf(reportValues[4]) / 60 + " mins " + Integer.valueOf(reportValues[4]) % 60 + " sec";
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
             ContentValues contentValues = new ContentValues();
@@ -973,12 +976,17 @@ public class ReportActivity extends AppCompatActivity {
 
      */
             y = 535;
-            String[] periodNames = {"Goals: ", "Assists: ", "SOG: ", "Time on ice: ", " ", "Possessions won: ", "Possessions lost: ", "Shifts: "};
+            String[] periodNames = {"Goals: ", "Assists: ", "SOG: ", "TOI: ", " ", "Possessions won: ", "Possessions lost: ", "Shifts: "};
             cb.setTextMatrix(250, y);
             cb.showText("Period 1: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i != 4) {
+                if (i==3){
+                    cb.setTextMatrix(250, y);
+                    cb.showText(periodNames[i] + (int)firstPeriod[i] / 60 + " mins " + (int)firstPeriod[i] % 60 + " sec");
+                    y -= 27;
+                }
+                else if (i != 4) {
                     cb.setTextMatrix(250, y);
                     cb.showText(periodNames[i] + (int) firstPeriod[i]);
                     y -= 27;
@@ -991,7 +999,12 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 2: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i != 4) {
+                if (i==3){
+                    cb.setTextMatrix(455, y);
+                    cb.showText(periodNames[i] + (int)secondPeriod[i] / 60 + " mins " + (int)secondPeriod[i] % 60 + " sec");
+                    y -= 27;
+                }
+                else if (i != 4) {
                     cb.setTextMatrix(455, y);
                     cb.showText(periodNames[i] + (int) secondPeriod[i]);
                     y -= 27;
@@ -1003,7 +1016,12 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 3: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i != 4) {
+                if (i==3){
+                    cb.setTextMatrix(665, y);
+                    cb.showText(periodNames[i] + (int)thirdPeriod[i] / 60 + " mins " + (int)thirdPeriod[i] % 60 + " sec");
+                    y -= 27;
+                }
+                else if (i != 4) {
                     cb.setTextMatrix(665, y);
                     cb.showText(periodNames[i] + (int) thirdPeriod[i]);
                     y -= 27;
@@ -1123,7 +1141,8 @@ public class ReportActivity extends AppCompatActivity {
             cb.setColorFill(BaseColor.BLACK);
             cb.setTextMatrix(240, 280);
             cb.setFontAndSize(bfBold, 25);
-            cb.showText("Performance Score: ");
+            float score = (float) ((0.75 * goals) + (0.7 * a1) + (0.55 * a2) + (0.075 * sog) + (0.05 * blk) + (0.15 * pd) - (0.15 * pt) + (0.01 * fow) - (0.01 * fol) + (0.05 * shotsFor) - (0.05 * shotsAgainst) + (0.15 * goalsFor) - (0.15* goalsAgainst));
+            cb.showText("Performance Score: " + String.valueOf(score));
 
 
             canvas.moveTo(230, document.bottom());
