@@ -105,6 +105,10 @@ public class ReportActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_3 = 3; //GameInfoActivity
     private static final int THIRD_ACTIVITY_REQUEST_CODE = 3;
 
+    private static final int FOURTH_ACTIVITY_REQUEST_CODE = 4;
+
+    private static final int REQUEST_CODE_4 = 4; //GameInfoActivity
+
 
     private Button endShiftBtn;
     private Button startShiftBtn;
@@ -161,7 +165,7 @@ public class ReportActivity extends AppCompatActivity {
     private static float[] otPeriod = new float[8];
 
 
-    private static int[] xlsxData = new int[53];
+    private static int[] xlsxData = new int[62];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
 
@@ -169,7 +173,7 @@ public class ReportActivity extends AppCompatActivity {
     private static String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
 
-    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights"};
+    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights", "pg1", "pg2", "pg3", "pa1", "pa2", "pa3", "ps1", "ps2", "ps3"};
 
     public static String name = "Radu Niculae";
     public static String date = "24102021";
@@ -177,6 +181,10 @@ public class ReportActivity extends AppCompatActivity {
     public static String teamFor = "Steaua";
     public static String teamAgainst = "Brasov";
     public static String position = "Right Wing";
+
+    public static float[] pastPerformance = new float[17];
+
+    public static float pg1,pg2,pg3,pa1,pa2,pa3,ps1,ps2,ps3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -784,6 +792,13 @@ public class ReportActivity extends AppCompatActivity {
 
         if (requestCode == THIRD_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                Intent myIntent = new Intent(ReportActivity.this, PastPerformance.class);
+                startActivityForResult(myIntent, FOURTH_ACTIVITY_REQUEST_CODE);
+            }
+        }
+
+        if (requestCode == FOURTH_ACTIVITY_REQUEST_CODE){
+            if(resultCode == RESULT_OK){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     //dataXLSXFile();
                     generatePDF();
@@ -875,6 +890,25 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = hits;
         k++;
         xlsxData[k] = fights;
+        k++;
+        xlsxData[k] = (int) pg1;
+        k++;
+        xlsxData[k] = (int) pg2;
+        k++;
+        xlsxData[k] = (int) pg3;
+        k++;
+        xlsxData[k] = (int) pa1;
+        k++;
+        xlsxData[k] = (int)  pa2;
+        k++;
+        xlsxData[k] = (int) pa3;
+        k++;
+        xlsxData[k] = (int) ps1;
+        k++;
+        xlsxData[k] = (int) ps2;
+        k++;
+        xlsxData[k] = (int) ps3;
+
 
 
     }
@@ -1309,7 +1343,7 @@ public class ReportActivity extends AppCompatActivity {
         otPeriod = new float[8];
 
 
-        xlsxData = new int[53];
+        xlsxData = new int[62];
         fieldEvents = new ArrayList<>();
         netEvents = new ArrayList<>();
 

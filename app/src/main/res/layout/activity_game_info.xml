@@ -244,7 +244,7 @@
         android:id="@+id/submitBtn"
         android:layout_width="306dp"
         android:layout_height="117dp"
-        android:text="@string/submitBtn"
+        android:text="SUBMIT"
         android:textAlignment="center"
         android:textSize="34sp"
         android:textStyle="bold"

@@ -10,14 +10,14 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class GameInfoActivity extends AppCompatActivity {
-    public static EditText position;
-    public static EditText teamAgainst;
-    public static EditText goalsFor;
-    public static EditText date;
-    public static EditText name;
-    public static EditText goalsAgainst;
-    public static EditText teamFor;
-    public static EditText location;
+    private EditText position;
+    private EditText teamAgainst;
+    private EditText goalsFor;
+    private EditText date;
+    private EditText name;
+    private EditText goalsAgainst;
+    private EditText teamFor;
+    private EditText location;
 
     private Button submitBtn;
 
