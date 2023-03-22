@@ -165,7 +165,7 @@ public class ReportActivity extends AppCompatActivity {
     private static float[] otPeriod = new float[8];
 
 
-    private static int[] xlsxData = new int[63];
+    private static int[] xlsxData = new int[64];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
 
@@ -173,7 +173,7 @@ public class ReportActivity extends AppCompatActivity {
     private static String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
 
-    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights", "pg1", "pg2", "pg3", "pa1", "pa2", "pa3", "ps1", "ps2", "ps3", "diff"};
+    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights", "pg1", "pg2", "pg3", "pa1", "pa2", "pa3", "ps1", "ps2", "ps3", "diff", "predicted"};
 
     public static String name = "Radu Niculae";
     public static String date = "24102021";
@@ -929,6 +929,8 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = (int) ps3;
         k++;
         xlsxData[k] = diff;
+        k++;
+        xlsxData[k] = predictedClass;
 
 
     }
@@ -1370,13 +1372,15 @@ public class ReportActivity extends AppCompatActivity {
 
         fights = 0;
 
+        predictedClass = 0;
+
         firstPeriod = new float[8];
         secondPeriod = new float[8];
         thirdPeriod = new float[8];
         otPeriod = new float[8];
 
 
-        xlsxData = new int[63];
+        xlsxData = new int[64];
         fieldEvents = new ArrayList<>();
         netEvents = new ArrayList<>();
 
