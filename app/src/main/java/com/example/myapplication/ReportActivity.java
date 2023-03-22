@@ -39,16 +39,10 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +51,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class ReportActivity extends AppCompatActivity {
+
+
+    private static int predictedClass;
+    private TFLiteModelHelper modelHelper;
 
     private Chronometer chronometer;
     private long pauseOffset;
@@ -68,6 +66,8 @@ public class ReportActivity extends AppCompatActivity {
     private static int period = 1;
 
     private static int goals = 0;
+
+    public static int diff = 0;
     private static int a1 = 0;
     private static int a2 = 0;
     private static int sog = 0;
@@ -165,7 +165,7 @@ public class ReportActivity extends AppCompatActivity {
     private static float[] otPeriod = new float[8];
 
 
-    private static int[] xlsxData = new int[62];
+    private static int[] xlsxData = new int[63];
     private static ArrayList<Triplet> fieldEvents = new ArrayList<>();
     private static ArrayList<Triplet> netEvents = new ArrayList<>();
 
@@ -173,7 +173,7 @@ public class ReportActivity extends AppCompatActivity {
     private static String[] reportData = {"Team for: ", "Team against: ", "Position: ", "Time on ice: ", "Shift average: ", "Goals: ", "1st Assists: ", "2nd Assists: ", "Points: ", "Shots: ", "Shots on Goal: ", "SOG%: ", "FaceOffs Won: ", "FaceOffs Lost: ", "FOW%: ", "Penalties Drawn: ", "Penalties Taken: ", "Possessions Won: ", "Possessions Lost: "};
 
 
-    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights", "pg1", "pg2", "pg3", "pa1", "pa2", "pa3", "ps1", "ps2", "ps3"};
+    private static String[] columnNames = {"Name", "Date", "Team For", "Team Against", "Position", "Location", "Goals For", "Goals Against", "p1g", "p1a", "p1sog", "p1toi", "p1shfavg", "p1posw", "p1posl", "p1shfnr", "p2g", "p2a", "p2sog", "p2toi", "p2shfavg", "p2posw", "p2posl", "p2shfnr", "p3g", "p3a", "p3sog", "p3toi", "p3shfavg", "p3posw", "p3posl", "p3shfnr", "p4g", "p4a", "p4sog", "p4toi", "p4shfavg", "p4posw", "p4posl", "p4shfnr", "a1", "a2", "sog", "nsog", "toi", "posw", "posl", "shfnr", "blk", "pd", "pt", "fow", "fol", "shotsFor", "shotsAgaints", "shfavg", "goals", "hits", "fights", "pg1", "pg2", "pg3", "pa1", "pa2", "pa3", "ps1", "ps2", "ps3", "diff"};
 
     public static String name = "Radu Niculae";
     public static String date = "24102021";
@@ -184,7 +184,7 @@ public class ReportActivity extends AppCompatActivity {
 
     public static float[] pastPerformance = new float[17];
 
-    public static float pg1,pg2,pg3,pa1,pa2,pa3,ps1,ps2,ps3;
+    public static float pg1, pg2, pg3, pa1, pa2, pa3, ps1, ps2, ps3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -631,7 +631,7 @@ public class ReportActivity extends AppCompatActivity {
                 if (!minutes.isEmpty()) {
                     int minutesNumber = Integer.parseInt(minutes);
 
-                    if (period*20 <= minutesNumber || (period-1)*20 > minutesNumber ) {
+                    if (period * 20 <= minutesNumber || (period - 1) * 20 > minutesNumber) {
                         Toast.makeText(getBaseContext(), "Invalid Time", Toast.LENGTH_SHORT).show();
                         buttonsDisable();
                     } else {
@@ -797,9 +797,18 @@ public class ReportActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == FOURTH_ACTIVITY_REQUEST_CODE){
-            if(resultCode == RESULT_OK){
+        if (requestCode == FOURTH_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    try {
+                        modelHelper = new TFLiteModelHelper(this);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Error loading model", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    onPredictButtonClick();
                     //dataXLSXFile();
                     generatePDF();
                     coordCSVFile();
@@ -815,6 +824,16 @@ public class ReportActivity extends AppCompatActivity {
                 }
             }
         }
+
+    }
+
+    private void onPredictButtonClick() {
+        // Create an input array with your feature values
+        float[] inputFeatures = new float[]{goals, a1 + a2, diff, sog + notOnGoalShots , timeOnIce, goalsAgainst, goalsFor, goals + a1 + a2, pg1, pg2, pg3, pa1, pa2, pa3, ps1, ps2, ps3};
+
+        // Make a prediction
+        predictedClass = modelHelper.predict(inputFeatures);
+
 
     }
 
@@ -899,7 +918,7 @@ public class ReportActivity extends AppCompatActivity {
         k++;
         xlsxData[k] = (int) pa1;
         k++;
-        xlsxData[k] = (int)  pa2;
+        xlsxData[k] = (int) pa2;
         k++;
         xlsxData[k] = (int) pa3;
         k++;
@@ -908,7 +927,8 @@ public class ReportActivity extends AppCompatActivity {
         xlsxData[k] = (int) ps2;
         k++;
         xlsxData[k] = (int) ps3;
-
+        k++;
+        xlsxData[k] = diff;
 
 
     }
@@ -1015,12 +1035,11 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 1: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i==3){
+                if (i == 3) {
                     cb.setTextMatrix(250, y);
-                    cb.showText(periodNames[i] + (int)firstPeriod[i] / 60 + " mins " + (int)firstPeriod[i] % 60 + " sec");
+                    cb.showText(periodNames[i] + (int) firstPeriod[i] / 60 + " mins " + (int) firstPeriod[i] % 60 + " sec");
                     y -= 27;
-                }
-                else if (i != 4) {
+                } else if (i != 4) {
                     cb.setTextMatrix(250, y);
                     cb.showText(periodNames[i] + (int) firstPeriod[i]);
                     y -= 27;
@@ -1033,12 +1052,11 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 2: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i==3){
+                if (i == 3) {
                     cb.setTextMatrix(455, y);
-                    cb.showText(periodNames[i] + (int)secondPeriod[i] / 60 + " mins " + (int)secondPeriod[i] % 60 + " sec");
+                    cb.showText(periodNames[i] + (int) secondPeriod[i] / 60 + " mins " + (int) secondPeriod[i] % 60 + " sec");
                     y -= 27;
-                }
-                else if (i != 4) {
+                } else if (i != 4) {
                     cb.setTextMatrix(455, y);
                     cb.showText(periodNames[i] + (int) secondPeriod[i]);
                     y -= 27;
@@ -1050,12 +1068,11 @@ public class ReportActivity extends AppCompatActivity {
             cb.showText("Period 3: ");
             y -= 27;
             for (int i = 0; i < periodNames.length; i++) {
-                if (i==3){
+                if (i == 3) {
                     cb.setTextMatrix(665, y);
-                    cb.showText(periodNames[i] + (int)thirdPeriod[i] / 60 + " mins " + (int)thirdPeriod[i] % 60 + " sec");
+                    cb.showText(periodNames[i] + (int) thirdPeriod[i] / 60 + " mins " + (int) thirdPeriod[i] % 60 + " sec");
                     y -= 27;
-                }
-                else if (i != 4) {
+                } else if (i != 4) {
                     cb.setTextMatrix(665, y);
                     cb.showText(periodNames[i] + (int) thirdPeriod[i]);
                     y -= 27;
@@ -1104,6 +1121,7 @@ public class ReportActivity extends AppCompatActivity {
             image3.scaleToFit(25, 12);
 
 
+
             for (int j = 0; j < netEvents.size(); j++) {
                 float xShot = netEvents.get(j).x / 9.06f - 3;
                 float yShot = netEvents.get(j).y / 9.1f;
@@ -1140,6 +1158,7 @@ public class ReportActivity extends AppCompatActivity {
 
             }
 
+            cb.beginText();
             cb.setColorFill(BaseColor.ORANGE);
             cb.setTextMatrix(240, 220);
             cb.setFontAndSize(bfBold, 17);
@@ -1173,11 +1192,23 @@ public class ReportActivity extends AppCompatActivity {
 
 
             cb.setColorFill(BaseColor.BLACK);
-            cb.setTextMatrix(240, 280);
+            cb.setTextMatrix(240, 285);
             cb.setFontAndSize(bfBold, 25);
-            float score = (float) ((0.75 * goals) + (0.7 * a1) + (0.55 * a2) + (0.075 * sog) + (0.05 * blk) + (0.15 * pd) - (0.15 * pt) + (0.01 * fow) - (0.01 * fol) + (0.05 * shotsFor) - (0.05 * shotsAgainst) + (0.15 * goalsFor) - (0.15* goalsAgainst));
+            float score = (float) ((0.75 * goals) + (0.7 * a1) + (0.55 * a2) + (0.075 * sog) + (0.05 * blk) + (0.15 * pd) - (0.15 * pt) + (0.01 * fow) - (0.01 * fol) + (0.05 * shotsFor) - (0.05 * shotsAgainst) + (0.15 * goalsFor) - (0.15 * goalsAgainst));
             cb.showText("Performance Score: " + String.valueOf(score));
 
+
+            String prediction;
+            if (predictedClass == 1) {
+                prediction = "At least one point";
+            } else {
+                prediction = "No points";
+            }
+
+            cb.setColorFill(BaseColor.BLACK);
+            cb.setTextMatrix(240, 250);
+            cb.showText("Prediction: " + prediction);
+            cb.endText();
 
             canvas.moveTo(230, document.bottom());
             canvas.lineTo(230, document.top());
@@ -1333,6 +1364,8 @@ public class ReportActivity extends AppCompatActivity {
         possessionsWon = 0;
         possessionsLost = 0;
 
+        diff = 0;
+
         hits = 0;
 
         fights = 0;
@@ -1343,7 +1376,7 @@ public class ReportActivity extends AppCompatActivity {
         otPeriod = new float[8];
 
 
-        xlsxData = new int[62];
+        xlsxData = new int[63];
         fieldEvents = new ArrayList<>();
         netEvents = new ArrayList<>();
 

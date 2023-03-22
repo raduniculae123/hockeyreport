@@ -48,5 +48,6 @@ dependencies {
     implementation 'org.apache.poi:poi:5.2.2'
     implementation 'org.apache.poi:poi-ooxml:5.2.2'
     implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+    implementation 'com.google.code.gson:gson:2.8.9' // Replace with the latest version
 
 }

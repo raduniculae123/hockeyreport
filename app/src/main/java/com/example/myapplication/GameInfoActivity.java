@@ -18,6 +18,7 @@ public class GameInfoActivity extends AppCompatActivity {
     private EditText goalsAgainst;
     private EditText teamFor;
     private EditText location;
+    private EditText diff;
 
     private Button submitBtn;
 
@@ -35,6 +36,7 @@ public class GameInfoActivity extends AppCompatActivity {
         goalsAgainst = findViewById(R.id.goalsAgainstInput);
         submitBtn = findViewById(R.id.submitBtn);
         location = findViewById(R.id.locationInput);
+        diff = findViewById(R.id.diffInput);
 
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
@@ -46,9 +48,10 @@ public class GameInfoActivity extends AppCompatActivity {
                 ReportActivity.name = String.valueOf(name.getText());
                 ReportActivity.date = String.valueOf(date.getText());
                 ReportActivity.location = String.valueOf(location.getText());
-                if(!String.valueOf(goalsFor.getText()).equals("") && !String.valueOf(goalsAgainst.getText()).equals("") ){
+                if(!String.valueOf(goalsFor.getText()).equals("") && !String.valueOf(goalsAgainst.getText()).equals("") && !String.valueOf(diff.getText()).equals("")){
                     ReportActivity.goalsFor = Integer.valueOf(String.valueOf(goalsFor.getText()));
                     ReportActivity.goalsAgainst = Integer.valueOf(String.valueOf(goalsAgainst.getText()));
+                    ReportActivity.diff = Integer.valueOf(String.valueOf(diff.getText()));
                 }
 
                 Intent resultIntent = new Intent();
