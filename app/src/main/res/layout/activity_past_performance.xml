@@ -92,7 +92,7 @@
             android:id="@+id/g1Lbl3"
             android:layout_width="119dp"
             android:layout_height="50dp"
-            android:text="G1"
+            android:text="G3"
             android:textAlignment="center"
             android:textSize="34sp"
             android:textStyle="bold"
