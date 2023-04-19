@@ -947,6 +947,8 @@ public class ReportActivity extends AppCompatActivity {
             reportValues[3] = timeOnIceString;
             reportValues[4] = String.valueOf((int) (timeOnIce * 1.0 / shifts));
             reportValues[4] = Integer.valueOf(reportValues[4]) / 60 + " mins " + Integer.valueOf(reportValues[4]) % 60 + " sec";
+
+
             // Get the content resolver and create a new file
             ContentResolver contentResolver = getContentResolver();
             ContentValues contentValues = new ContentValues();
@@ -1228,7 +1230,7 @@ public class ReportActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.Q)
     void dataCSVFile() {
         insertData();
-        String fileName = "DATACSV" + date + ".csv";
+        String fileName = "DATACSV" + date + name + ".csv";
 
         try {
             // Create a new CSV file in the Downloads directory
@@ -1302,7 +1304,7 @@ public class ReportActivity extends AppCompatActivity {
                 data[data.length - 1] = row;
             }
 
-            String fileName = "COORD" + date + ".csv";
+            String fileName = "COORD" + date + name +".csv";
             File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
 
             // Check if the file already exists
