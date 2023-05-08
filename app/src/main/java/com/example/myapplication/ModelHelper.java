@@ -19,12 +19,12 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class TFLiteModelHelper {
+public class ModelHelper {
     private final Interpreter tflite;
     private final float[] mean;
     private final float[] std;
 
-    public TFLiteModelHelper(Context context) throws IOException {
+    public ModelHelper(Context context) throws IOException {
         tflite = new Interpreter(loadModelFile(context));
         Map<String, float[]> meanStdValues = getMeanStdValues(context);
         mean = meanStdValues.get("mean");

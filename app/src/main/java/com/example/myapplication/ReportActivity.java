@@ -54,7 +54,7 @@ public class ReportActivity extends AppCompatActivity {
 
 
     private static int predictedClass;
-    private TFLiteModelHelper modelHelper;
+    private ModelHelper modelHelper;
 
     private Chronometer chronometer;
     private long pauseOffset;
@@ -801,7 +801,7 @@ public class ReportActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     try {
-                        modelHelper = new TFLiteModelHelper(this);
+                        modelHelper = new ModelHelper(this);
                     } catch (IOException e) {
                         e.printStackTrace();
                         Toast.makeText(this, "Error loading model", Toast.LENGTH_SHORT).show();
